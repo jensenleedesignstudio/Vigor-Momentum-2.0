@@ -172,11 +172,26 @@ function Today({ exercises, update, momentum, trained, setTab }: { exercises: Ex
 
 function Routine({ exercises, update, remove, add, targets, notify }: { exercises:Exercise[]; update:(id:number,p:Partial<Exercise>)=>void; remove:(id:number)=>void; add:()=>void; targets:string[]; notify:(x:string)=>void }) {
   const [prompt,setPrompt]=useState("");
-  return <div className="builder fade-up">
-    <div className="builder-top"><div><span className="eyebrow">WEEKLY PROGRAM / {exercises.length} MOVEMENTS</span><h1>Shape the work.</h1><p>Arrange each movement, dial in the details, and make the routine yours.</p></div><BodyMap active={Array.from(new Set(exercises.map(e=>e.muscle)))}/></div>
-    <section className="ai-box"><span className="spark">✦</span><div><label>BUILD WITH AI</label><input value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="e.g. Build a 4-day strength plan with extra back work…" onKeyDown={e=>{if(e.key==="Enter"){notify("AI routine drafted — ready to refine.");setPrompt("")}}}/></div><button onClick={()=>{notify("AI routine drafted — ready to refine.");setPrompt("")}}>Generate <b>→</b></button></section>
-    <div className="routine-table"><div className="table-head"><span>#</span><span>EXERCISE</span><span>MUSCLE</span><span>SETS</span><span>REPS / TIME</span><span></span></div>{exercises.map((e,i)=><div className="routine-row" key={e.id}><span className="drag">⠿ {String(i+1).padStart(2,"0")}</span><input value={e.name} onChange={x=>update(e.id,{name:x.target.value})}/><select value={e.muscle} onChange={x=>update(e.id,{muscle:x.target.value})}>{MUSCLES.map(m=><option key={m}>{m}</option>)}</select><input type="number" min="1" value={e.sets} onChange={x=>update(e.id,{sets:+x.target.value})}/><input value={e.reps} onChange={x=>update(e.id,{reps:x.target.value})}/><button aria-label={`Remove ${e.name}`} onClick={()=>remove(e.id)}>×</button></div>)}</div>
-    <button className="add-row" onClick={add}><span>＋</span> Add routine task</button><div className="savebar"><span>AUTO-SAVED LOCALLY</span><button className="primary" onClick={()=>notify("Routine saved. Momentum secured.")}>Save routine ↗</button></div>
+  const columnInfo = [{id:"backlog",label:"Backlog",dot:"gray"},{id:"todo",label:"To do",dot:"blue"},{id:"progress",label:"In progress",dot:"amber"},{id:"done",label:"Done",dot:"green"}] as const;
+  const [statuses,setStatuses]=useState<Record<number,string>>(()=>Object.fromEntries(exercises.map((e,i)=>[e.id,e.done?"done":i===0?"progress":i<3?"todo":"backlog"])));
+  useEffect(()=>setStatuses(old=>{const next={...old};exercises.forEach(e=>{if(!next[e.id])next[e.id]="backlog"});return next}),[exercises]);
+  const move=(e:Exercise,status:string)=>{setStatuses(x=>({...x,[e.id]:status}));update(e.id,{done:status==="done"})};
+  return <div className="builder board-builder fade-up">
+    <div className="board-title"><div><span className="eyebrow">ROUTINE BUILDER / WEEKLY PROGRAM</span><h1>Shape the work.</h1><p>Move each exercise from possibility to complete. Select any card to edit it.</p></div><button className="board-add" onClick={add}>＋ <b>Add task</b></button></div>
+    <div className="board-tools"><div className="view-tabs"><button className="active">Board</button><button>Timeline</button></div><div><button>▽ Filter</button><button>☷ Group: Status</button></div></div>
+    <section className="board-ai"><span>✦</span><div><label>BUILD WITH AI</label><input value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Describe the routine you want to build…" onKeyDown={e=>{if(e.key==="Enter"){notify("AI routine drafted — ready to refine.");setPrompt("")}}}/></div><button onClick={()=>{notify("AI routine drafted — ready to refine.");setPrompt("")}}>Generate →</button></section>
+    <div className="kanban">{columnInfo.map(col=>{const cards=exercises.filter(e=>(statuses[e.id]||"backlog")===col.id);return <section className="kanban-column" key={col.id}>
+      <header><div><i className={col.dot}/><b>{col.label}</b><span>{cards.length}</span></div><button onClick={add}>＋</button></header>
+      <div className="kanban-cards">{cards.map((e,i)=><article className={`workout-card ${col.id}`} key={e.id}>
+        <div className="card-status"><label><input type="checkbox" checked={col.id==="done"} onChange={x=>move(e,x.target.checked?"done":"todo")}/><span>{col.id==="done"?"Complete":"Routine task"}</span></label><b className={e.difficulty>7?"high":e.difficulty>5?"medium":"low"}>{e.difficulty>7?"HIGH":e.difficulty>5?"MEDIUM":"LOW"}</b></div>
+        <input className="card-name" value={e.name} onChange={x=>update(e.id,{name:x.target.value})}/>
+        <p>{e.sets} sets × {e.reps} reps targeting {e.muscle.toLowerCase()}.</p>
+        <div className="card-fields"><select value={e.muscle} onChange={x=>update(e.id,{muscle:x.target.value})}>{MUSCLES.map(m=><option key={m}>{m}</option>)}</select><label>SETS<input type="number" min="1" value={e.sets} onChange={x=>update(e.id,{sets:+x.target.value})}/></label><label>REPS<input value={e.reps} onChange={x=>update(e.id,{reps:x.target.value})}/></label></div>
+        <div className="card-foot"><span className="avatar">VM</span><select aria-label={`Move ${e.name}`} value={col.id} onChange={x=>move(e,x.target.value)}>{columnInfo.map(c=><option value={c.id} key={c.id}>{c.label}</option>)}</select><span>◷ {Math.max(30,e.sets*12)}m</span><button aria-label={`Remove ${e.name}`} onClick={()=>remove(e.id)}>×</button></div>
+      </article>)}</div>
+      <button className="column-add" onClick={add}>＋ Add exercise</button>
+    </section>})}</div>
+    <div className="board-footer"><div><span>AUTO-SAVED LOCALLY</span><small>{exercises.length} exercises · {Array.from(new Set(exercises.map(e=>e.muscle))).length} muscle groups</small></div><button onClick={()=>notify("Routine saved. Momentum secured.")}>Save routine ↗</button></div>
   </div>;
 }
 
