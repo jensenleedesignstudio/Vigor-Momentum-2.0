@@ -74,7 +74,7 @@ function inferMuscles(name:string, fallback:string) {
 
 function ExerciseMuscleMap({ name, muscle }: { name:string; muscle:string }) {
   const detected=inferMuscles(name,muscle); const all=[detected.primary,...detected.secondary];
-  return <div className="exercise-map"><div className="anatomy-image">{all.flatMap((m,mi)=>(MUSCLE_POINTS[m]||[]).map((p,i)=><i className={`${mi===0?"primary":"secondary"} ${m.toLowerCase().replaceAll(" ","-")}`} style={{left:`${p.x}%`,top:`${p.y}%`}} key={`${m}-${i}`}/>))}</div><div><span>AI MUSCLE MATCH</span><b>{detected.primary}</b><small>{MUSCLE_INFO[detected.primary]}</small>{detected.secondary.length>0&&<small>Supports: {detected.secondary.join(" + ")}</small>}</div></div>;
+  return <><div className="exercise-map"><div className="anatomy-image">{all.flatMap((m,mi)=>(MUSCLE_POINTS[m]||[]).map((p,i)=><i className={`${mi===0?"primary":"secondary"} ${m.toLowerCase().replaceAll(" ","-")}`} style={{left:`${p.x}%`,top:`${p.y}%`}} key={`${m}-${i}`}/>))}</div><div><span>AI MUSCLE MATCH</span><b>{detected.primary}</b><small>{MUSCLE_INFO[detected.primary]}</small>{detected.secondary.length>0&&<small>Supports: {detected.secondary.join(" + ")}</small>}</div></div><a className="youtube-demo" href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${name} proper form tutorial`)}`} target="_blank" rel="noreferrer" onClick={event=>event.stopPropagation()}><span>▶</span><b>Watch movement demo</b><small>YouTube · proper form ↗</small></a></>;
 }
 
 export default function Home() {
