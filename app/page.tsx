@@ -99,7 +99,7 @@ export default function Home() {
 
     {screen === "profile" && <section className="onboard slide-in">
       <TopBar step="02 — YOUR BASELINE" />
-      <div className="onboard-copy"><p className="eyebrow">LET’S MAKE IT YOURS</p><h1>Start where<br />you <em>are.</em></h1><p>A few simple details help us shape training that fits your body and your direction.</p></div>
+      <div className="onboard-copy"><p className="eyebrow">LET’S MAKE IT YOURS</p><h1 className="slide-typewriter">Start where<br />you <em>are.</em></h1><p>A few simple details help us shape training that fits your body and your direction.</p></div>
       <div className="form-panel">
         <div className="measure"><label>Weight</label><div><input defaultValue="75" type="number" /><select><option>kg</option><option>lb</option></select></div></div>
         <div className="measure"><label>Height</label><div><input defaultValue="178" type="number" /><select><option>cm</option><option>ft/in</option></select></div></div>
@@ -112,7 +112,7 @@ export default function Home() {
 
     {screen === "plan" && <section className="plan-screen slide-in">
       <TopBar step="03 — YOUR RHYTHM" />
-      <div className="plan-copy"><p className="eyebrow">ALMOST THERE</p><h1>Make room<br />for <em>progress.</em></h1><p>Choose the rhythm and focus. We’ll give you a practical starting routine.</p></div>
+      <div className="plan-copy"><p className="eyebrow">ALMOST THERE</p><h1 className="slide-typewriter">Make room<br />for <em>progress.</em></h1><p>Choose the rhythm and focus. We’ll give you a practical starting routine.</p></div>
       <div className="plan-panel">
         <label className="section-label">Days available each week</label><div className="day-row">{[2,3,4,5,6].map(d => <button key={d} className={days === d ? "selected" : ""} onClick={() => setDays(d)}>{d}<small>{d === 2 ? "LIGHT" : d === 6 ? "FOCUSED" : "DAYS"}</small></button>)}</div>
         <label className="section-label">Muscle groups to prioritize</label><div className="chips">{MUSCLES.map(m => <button key={m} className={targets.includes(m) ? "selected" : ""} onClick={() => setTargets(x => x.includes(m) ? x.filter(y => y !== m) : [...x, m])}><span>{targets.includes(m) ? "●" : "○"}</span>{m}</button>)}</div>
