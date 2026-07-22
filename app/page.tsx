@@ -22,6 +22,10 @@ const seed: Exercise[] = [
 
 function Mark() { return <span className="mark">VM<span>●</span></span>; }
 
+function TypeText({ text, delay = 0, className = "" }: { text: string; delay?: number; className?: string }) {
+  return <span className={`typed-text ${className}`} aria-label={text}>{[...text].map((letter, i) => <span aria-hidden="true" className="typed-letter" style={{ animationDelay: `${delay + i * 0.065}s` }} key={`${letter}-${i}`}>{letter === " " ? "\u00a0" : letter}</span>)}</span>;
+}
+
 function BodyMap({ active = ["Chest", "Back", "Quads"] }: { active?: string[] }) {
   const on = (m: string) => active.includes(m) ? "hot" : "";
   return <div className="body-wrap" aria-label={`Muscles trained: ${active.join(", ")}`}>
@@ -93,13 +97,13 @@ export default function Home() {
 
     {screen === "intro" && <section className="intro-screen">
       <div className="intro-top"><Mark /><span>EST. FOR THE NEXT REP</span></div>
-      <div className="intro-center"><p className="eyebrow">YOUR PRACTICE. YOUR PACE.</p><h1 className="typewriter">VIGOR MOMENTUM</h1><p>every rep. every set. more momentum.<br />progress without limits.</p><button className="primary light" onClick={() => setScreen("profile")}>Build momentum <b>↗</b></button></div>
+      <div className="intro-center"><p className="eyebrow">YOUR PRACTICE. YOUR PACE.</p><h1><TypeText text="VIGOR MOMENTUM" delay={0.15} /></h1><p>every rep. every set. more momentum.<br />progress without limits.</p><button className="primary light" onClick={() => setScreen("profile")}>Build momentum <b>↗</b></button></div>
       <div className="intro-foot"><span>STRONGER / STEADIER / YOURS</span><span>SCROLL TO NOTHING. START HERE.</span></div>
     </section>}
 
     {screen === "profile" && <section className="onboard slide-in">
       <TopBar step="02 — YOUR BASELINE" />
-      <div className="onboard-copy"><p className="eyebrow">LET’S MAKE IT YOURS</p><h1 className="slide-typewriter">Start where<br />you <em>are.</em></h1><p>A few simple details help us shape training that fits your body and your direction.</p></div>
+      <div className="onboard-copy"><p className="eyebrow">LET’S MAKE IT YOURS</p><h1 className="letter-headline"><TypeText text="Start where" delay={0.35} /><br /><TypeText text="you " delay={1.12} /><em><TypeText text="are." delay={1.38} /></em></h1><p>A few simple details help us shape training that fits your body and your direction.</p></div>
       <div className="form-panel">
         <div className="measure"><label>Weight</label><div><input defaultValue="75" type="number" /><select><option>kg</option><option>lb</option></select></div></div>
         <div className="measure"><label>Height</label><div><input defaultValue="178" type="number" /><select><option>cm</option><option>ft/in</option></select></div></div>
@@ -141,7 +145,7 @@ export default function Home() {
   </main>;
 }
 
-function TopBar({ step }: { step: string }) { return <header className="topbar"><Mark /><span>{step}</span><span>VIGOR / MOMENTUM</span></header>; }
+function TopBar({ step }: { step: string }) { return <header className="topbar"><Mark /><span><TypeText text={step} delay={0.05} /></span><span><TypeText text="VIGOR / MOMENTUM" delay={0.55} /></span></header>; }
 
 function Today({ exercises, update, momentum, trained, setTab }: { exercises: Exercise[]; update:(id:number,p:Partial<Exercise>)=>void; momentum:number; trained:string[]; setTab:(x:Tab)=>void }) {
   return <div className="dashboard fade-up">
