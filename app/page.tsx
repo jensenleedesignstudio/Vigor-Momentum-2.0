@@ -84,6 +84,7 @@ export default function Home() {
   const [days, setDays] = useState(4);
   const [targets, setTargets] = useState<string[]>(["Chest", "Mid-Back", "Quadriceps"]);
   const [exercises, setExercises] = useState<Exercise[]>(seed);
+  const [schedule,setSchedule]=useState<Record<number,string>>({1:"monday",2:"wednesday",3:"friday"});
   const [volume, setVolume] = useState(28);
   const [muted, setMuted] = useState(true);
   const [musicOpen, setMusicOpen] = useState(false);
@@ -94,10 +95,11 @@ export default function Home() {
   const player = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => { if (screen === "intro") { const t = setTimeout(() => {}, 10); return () => clearTimeout(t); } }, [screen]);
-  useEffect(() => { try { const saved = localStorage.getItem("vm-state"); if (saved) { const p = JSON.parse(saved); if (p.exercises) setExercises(p.exercises.map((e:Exercise)=>({...e,muscle:e.muscle==="Back"?"Mid-Back":e.muscle==="Quads"?"Quadriceps":e.muscle==="Arms"?inferMuscles(e.name,"Biceps").primary:e.muscle}))); if (p.journal) setJournal(p.journal); if(p.records)setRecords(p.records); } } catch {} }, []);
-  useEffect(() => { try { localStorage.setItem("vm-state", JSON.stringify({ exercises, journal, records })); } catch {} }, [exercises, journal, records]);
+  useEffect(() => { try { const saved = localStorage.getItem("vm-state"); if (saved) { const p = JSON.parse(saved); if (p.exercises) setExercises(p.exercises.map((e:Exercise)=>({...e,muscle:e.muscle==="Back"?"Mid-Back":e.muscle==="Quads"?"Quadriceps":e.muscle==="Arms"?inferMuscles(e.name,"Biceps").primary:e.muscle}))); if (p.journal) setJournal(p.journal); if(p.records)setRecords(p.records); if(p.schedule)setSchedule(p.schedule); } } catch {} }, []);
+  useEffect(() => { try { localStorage.setItem("vm-state", JSON.stringify({ exercises, journal, records, schedule })); } catch {} }, [exercises, journal, records, schedule]);
   const trained = useMemo(() => Array.from(new Set(exercises.filter(e => e.done).map(e => e.muscle))), [exercises]);
   const momentum = Math.round((exercises.filter(e => e.done).length / Math.max(exercises.length, 1)) * 100);
+  const consistencyDays=new Set(exercises.filter(e=>e.done).map(e=>schedule[e.id]||"monday")).size;
   const msgPlayer = (func: string, args: number[] = []) => player.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "*");
   const toggleMusic = () => { const next = !muted; setMuted(next); msgPlayer(next ? "mute" : "unMute"); if (!next) msgPlayer("playVideo"); };
   const changeVolume = (v: number) => { setVolume(v); msgPlayer("setVolume", [v]); if (v > 0 && muted) { setMuted(false); msgPlayer("unMute"); msgPlayer("playVideo"); } };
@@ -168,7 +170,7 @@ export default function Home() {
       <aside>
         <Mark />
         <nav>{([["today","Today","⌁"],["routine","Routine builder","＋"],["progress","Progress","↗"],["calendar","Calendar","□"]] as [Tab,string,string][]).map(([id,label,icon]) => <button key={id} onClick={() => setTab(id)} className={tab === id ? "active" : ""}><span>{icon}</span>{label}</button>)}</nav>
-        <div className="streak"><span>CONSISTENCY</span><strong>6 <small>WEEK<br />STREAK</small></strong><div>{[1,2,3,4,5,6,7].map((x,i)=><i key={x} className={i<6?"on":""}/>)}</div></div>
+        <div className="streak"><span>CONSISTENCY / THIS WEEK</span><strong>{consistencyDays} <small>DAYS<br />TRAINED</small></strong><div>{[1,2,3,4,5,6,7].map((x,i)=><i key={x} className={i<consistencyDays?"on":""}/>)}</div></div>
         <button className="profile"><span>{name.slice(0,1).toUpperCase()}</span><b>{name}<small>Example account</small></b><i>•••</i></button>
       </aside>
       <div className="workspace">
@@ -176,7 +178,7 @@ export default function Home() {
         {musicOpen && <div className="music-pop"><div><span>NOW PLAYING</span><b>Momentum mix</b></div><button onClick={toggleMusic}>{muted ? "PLAY" : "PAUSE"}</button><input aria-label="Music volume" type="range" min="0" max="100" value={volume} onChange={e=>changeVolume(+e.target.value)} /><small>{volume}%</small></div>}
 
         {tab === "today" && <Today exercises={exercises} update={update} momentum={momentum} trained={trained} setTab={setTab} />}
-        {tab === "routine" && <Routine exercises={exercises} update={update} remove={remove} add={addExercise} targets={targets} notify={notify} />}
+        {tab === "routine" && <Routine exercises={exercises} update={update} remove={remove} add={addExercise} targets={targets} notify={notify} statuses={schedule} setStatuses={setSchedule} />}
         {tab === "progress" && <Progress exercises={exercises} update={update} trained={trained} journal={journal} setJournal={setJournal} photos={photos} upload={upload} notify={notify} addRecord={addRecord} />}
         {tab === "calendar" && <Calendar records={records} />}
       </div>
@@ -197,7 +199,7 @@ function Today({ exercises, update, momentum, trained, setTab }: { exercises: Ex
   </div>;
 }
 
-function Routine({ exercises, update, remove, add, targets, notify }: { exercises:Exercise[]; update:(id:number,p:Partial<Exercise>)=>void; remove:(id:number)=>void; add:()=>number; targets:string[]; notify:(x:string)=>void }) {
+function Routine({ exercises, update, remove, add, targets, notify, statuses, setStatuses }: { exercises:Exercise[]; update:(id:number,p:Partial<Exercise>)=>void; remove:(id:number)=>void; add:()=>number; targets:string[]; notify:(x:string)=>void;statuses:Record<number,string>;setStatuses:React.Dispatch<React.SetStateAction<Record<number,string>>> }) {
   const [prompt,setPrompt]=useState("");
   const [filtersOpen,setFiltersOpen]=useState(false);
   const [dayFilter,setDayFilter]=useState("all");
@@ -208,7 +210,6 @@ function Routine({ exercises, update, remove, add, targets, notify }: { exercise
   const [selectedWorkouts,setSelectedWorkouts]=useState<number[]>([]);
   const toggleWorkout=(id:number)=>setSelectedWorkouts(list=>list.includes(id)?list.filter(x=>x!==id):[...list,id]);
   const columnInfo = [{id:"monday",label:"Monday",dot:"blue"},{id:"tuesday",label:"Tuesday",dot:"amber"},{id:"wednesday",label:"Wednesday",dot:"green"},{id:"thursday",label:"Thursday",dot:"violet"},{id:"friday",label:"Friday",dot:"coral"},{id:"saturday",label:"Saturday",dot:"gold"},{id:"sunday",label:"Sunday",dot:"gray"}] as const;
-  const [statuses,setStatuses]=useState<Record<number,string>>(()=>Object.fromEntries(exercises.map((e,i)=>[e.id,columnInfo[i%columnInfo.length].id])));
   useEffect(()=>setStatuses(old=>{const next={...old};exercises.forEach((e,i)=>{if(!next[e.id])next[e.id]=columnInfo[i%columnInfo.length].id});return next}),[exercises]);
   const move=(e:Exercise,status:string)=>setStatuses(x=>({...x,[e.id]:status}));
   const addToDay=(day:string)=>{const id=add();setStatuses(x=>({...x,[id]:day}));notify(`Exercise added to ${columnInfo.find(d=>d.id===day)?.label||day}.`)};
