@@ -26,7 +26,7 @@ const seed: Exercise[] = [
   { id: 3, name: "Chest-supported row", muscle: "Mid-Back", sets: 3, reps: "12", weight: 45, duration: 0, difficulty: 7, done: false },
 ];
 
-function Mark() { return <span className="mark">VM<span>●</span></span>; }
+function Mark({onClick}:{onClick?:()=>void}={}) { const logo=<span className="mark">VM<span>●</span></span>; return onClick?<button className="mark-button" onClick={onClick} aria-label="Return to main menu">{logo}</button>:logo; }
 
 function TypeText({ text, delay = 0, className = "" }: { text: string; delay?: number; className?: string }) {
   const [visible, setVisible] = useState(0);
@@ -85,6 +85,11 @@ export default function Home() {
   const [targets, setTargets] = useState<string[]>(["Chest", "Mid-Back", "Quadriceps"]);
   const [goal,setGoal]=useState("Build muscle");
   const [experience,setExperience]=useState("Some experience");
+  const [weight,setWeight]=useState(75);
+  const [weightUnit,setWeightUnit]=useState("kg");
+  const [height,setHeight]=useState(178);
+  const [heightUnit,setHeightUnit]=useState("cm");
+  const [settingsOpen,setSettingsOpen]=useState(false);
   const [exercises, setExercises] = useState<Exercise[]>(seed);
   const [schedule,setSchedule]=useState<Record<number,string>>({1:"monday",2:"wednesday",3:"friday"});
   const [volume, setVolume] = useState(28);
@@ -97,8 +102,8 @@ export default function Home() {
   const player = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => { if (screen === "intro") { const t = setTimeout(() => {}, 10); return () => clearTimeout(t); } }, [screen]);
-  useEffect(() => { try { const saved = localStorage.getItem("vm-state"); if (saved) { const p = JSON.parse(saved); if (p.exercises) setExercises(p.exercises.map((e:Exercise)=>({...e,muscle:e.muscle==="Back"?"Mid-Back":e.muscle==="Quads"?"Quadriceps":e.muscle==="Arms"?inferMuscles(e.name,"Biceps").primary:e.muscle}))); if (p.journal) setJournal(p.journal); if(p.records)setRecords(p.records); if(p.schedule)setSchedule(p.schedule); } } catch {} }, []);
-  useEffect(() => { try { localStorage.setItem("vm-state", JSON.stringify({ exercises, journal, records, schedule })); } catch {} }, [exercises, journal, records, schedule]);
+  useEffect(() => { try { const saved = localStorage.getItem("vm-state"); if (saved) { const p = JSON.parse(saved); if (p.exercises) setExercises(p.exercises.map((e:Exercise)=>({...e,muscle:e.muscle==="Back"?"Mid-Back":e.muscle==="Quads"?"Quadriceps":e.muscle==="Arms"?inferMuscles(e.name,"Biceps").primary:e.muscle}))); if (p.journal) setJournal(p.journal); if(p.records)setRecords(p.records); if(p.schedule)setSchedule(p.schedule); if(p.profile){setName(p.profile.name||"Alex");setWeight(p.profile.weight||75);setWeightUnit(p.profile.weightUnit||"kg");setHeight(p.profile.height||178);setHeightUnit(p.profile.heightUnit||"cm");setGoal(p.profile.goal||"Build muscle");setExperience(p.profile.experience||"Some experience")} } } catch {} }, []);
+  useEffect(() => { try { localStorage.setItem("vm-state", JSON.stringify({ exercises, journal, records, schedule, profile:{name,weight,weightUnit,height,heightUnit,goal,experience} })); } catch {} }, [exercises, journal, records, schedule, name, weight, weightUnit, height, heightUnit, goal, experience]);
   const trained = useMemo(() => Array.from(new Set(exercises.filter(e => e.done).map(e => e.muscle))), [exercises]);
   const momentum = Math.round((exercises.filter(e => e.done).length / Math.max(exercises.length, 1)) * 100);
   const consistencyDays=new Set(exercises.filter(e=>e.done).map(e=>schedule[e.id]||"monday")).size;
@@ -153,8 +158,8 @@ export default function Home() {
       <TopBar step="02 — YOUR BASELINE" />
       <div className="onboard-copy"><p className="eyebrow">LET’S MAKE IT YOURS</p><h1 className="letter-headline"><TypeText text="Start where" delay={0.35} /><br /><TypeText text="you " delay={1.12} /><em><TypeText text="are." delay={1.38} /></em></h1><p>A few simple details help us shape training that fits your body and your direction.</p></div>
       <div className="form-panel">
-        <div className="measure"><label>Weight</label><div><input defaultValue="75" type="number" /><select><option>kg</option><option>lb</option></select></div></div>
-        <div className="measure"><label>Height</label><div><input defaultValue="178" type="number" /><select><option>cm</option><option>ft/in</option></select></div></div>
+        <div className="measure"><label>Weight</label><div><input value={weight} onChange={e=>setWeight(+e.target.value)} type="number" /><select value={weightUnit} onChange={e=>setWeightUnit(e.target.value)}><option>kg</option><option>lb</option></select></div></div>
+        <div className="measure"><label>Height</label><div><input value={height} onChange={e=>setHeight(+e.target.value)} type="number" /><select value={heightUnit} onChange={e=>setHeightUnit(e.target.value)}><option>cm</option><option>ft/in</option></select></div></div>
         <label>Primary goal<select value={goal} onChange={e=>setGoal(e.target.value)}><option>Build muscle</option><option>Get stronger</option><option>Lose fat</option><option>Improve endurance</option><option>Move better</option></select></label>
         <label>Experience<select value={experience} onChange={e=>setExperience(e.target.value)}><option>Some experience</option><option>Just starting</option><option>Advanced</option></select></label>
         <button className="primary" onClick={() => setScreen("plan")}>Build vigor <b>→</b></button>
@@ -176,10 +181,10 @@ export default function Home() {
 
     {screen === "home" && <section className="app-shell">
       <aside>
-        <Mark />
+        <Mark onClick={()=>setScreen("account")} />
         <nav>{([["today","Today","⌁"],["routine","Routine builder","＋"],["progress","Progress","↗"],["calendar","Calendar","□"]] as [Tab,string,string][]).map(([id,label,icon]) => <button key={id} onClick={() => setTab(id)} className={tab === id ? "active" : ""}><span>{icon}</span>{label}</button>)}</nav>
         <div className="streak"><span>CONSISTENCY / THIS WEEK</span><strong>{consistencyDays} <small>DAYS<br />TRAINED</small></strong><div>{[1,2,3,4,5,6,7].map((x,i)=><i key={x} className={i<consistencyDays?"on":""}/>)}</div></div>
-        <button className="profile"><span>{name.slice(0,1).toUpperCase()}</span><b>{name}<small>Example account</small></b><i>•••</i></button>
+        <button className="profile" onClick={()=>setSettingsOpen(true)} aria-label="Open profile settings"><span>{name.slice(0,1).toUpperCase()}</span><b>{name}<small>{height} {heightUnit} · {weight} {weightUnit}</small></b><i>•••</i></button>
       </aside>
       <div className="workspace">
         <header className="app-header"><div><span className="eyebrow">VIGOR MOMENTUM / {tab}</span><h2>{tab === "today" ? `Good morning, ${name}.` : tab === "routine" ? "Routine builder." : tab === "progress" ? "Progress, made visible." : "Your training calendar."}</h2></div><div className="header-actions"><button>⌕</button><button className="sound-btn" onClick={() => setMusicOpen(!musicOpen)}>{muted ? "♪̸" : "♫"}</button><span>{new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" }).toUpperCase()}</span></div></header>
@@ -190,6 +195,7 @@ export default function Home() {
         {tab === "progress" && <Progress exercises={exercises} update={update} trained={trained} journal={journal} setJournal={setJournal} photos={photos} upload={upload} notify={notify} addRecord={addRecord} />}
         {tab === "calendar" && <Calendar records={records} />}
       </div>
+      {settingsOpen&&<div className="settings-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setSettingsOpen(false)}}><section className="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title"><header><div><span className="eyebrow">ACCOUNT SETTINGS</span><h2 id="settings-title">Your baseline.</h2></div><button onClick={()=>setSettingsOpen(false)} aria-label="Close settings">×</button></header><div className="settings-fields"><label>Username<input value={name} onChange={e=>setName(e.target.value)}/></label><div className="settings-measure"><label>Weight<input type="number" min="1" value={weight} onChange={e=>setWeight(+e.target.value)}/></label><label>Unit<select value={weightUnit} onChange={e=>setWeightUnit(e.target.value)}><option>kg</option><option>lb</option></select></label></div><div className="settings-measure"><label>Height<input type="number" min="1" value={height} onChange={e=>setHeight(+e.target.value)}/></label><label>Unit<select value={heightUnit} onChange={e=>setHeightUnit(e.target.value)}><option>cm</option><option>ft/in</option></select></label></div><label>Primary goal<select value={goal} onChange={e=>setGoal(e.target.value)}><option>Build muscle</option><option>Get stronger</option><option>Lose fat</option><option>Improve endurance</option><option>Move better</option></select></label><label>Experience<select value={experience} onChange={e=>setExperience(e.target.value)}><option>Some experience</option><option>Just starting</option><option>Advanced</option></select></label></div><button className="primary settings-save" onClick={()=>{setSettingsOpen(false);notify("Profile settings saved.")}}>Save settings <b>✓</b></button></section></div>}
     </section>}
   </main>;
 }
