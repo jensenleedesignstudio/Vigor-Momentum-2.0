@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Screen = "account" | "intro" | "profile" | "plan" | "home";
-type Tab = "today" | "routine" | "progress";
+type Tab = "today" | "routine" | "progress" | "calendar";
 type Exercise = { id: number; name: string; muscle: string; sets: number; reps: string; weight: number; duration: number; difficulty: number; done: boolean };
+type ActivityRecord = { id:number; date:string; type:"session"|"note"|"photo"; title:string; detail:string };
 
 const MUSCLES = ["Chest", "Upper Back", "Mid-Back", "Lower Back", "Shoulders", "Biceps", "Triceps", "Core", "Glutes", "Quadriceps", "Hamstrings", "Calves"];
 const MUSCLE_INFO: Record<string,string> = {
@@ -88,12 +89,13 @@ export default function Home() {
   const [musicOpen, setMusicOpen] = useState(false);
   const [journal, setJournal] = useState("Felt strong today. Squats moved cleanly and I had more in the tank.");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [records,setRecords]=useState<ActivityRecord[]>([]);
   const [toast, setToast] = useState("");
   const player = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => { if (screen === "intro") { const t = setTimeout(() => {}, 10); return () => clearTimeout(t); } }, [screen]);
-  useEffect(() => { try { const saved = localStorage.getItem("vm-state"); if (saved) { const p = JSON.parse(saved); if (p.exercises) setExercises(p.exercises.map((e:Exercise)=>({...e,muscle:e.muscle==="Back"?"Mid-Back":e.muscle==="Quads"?"Quadriceps":e.muscle==="Arms"?inferMuscles(e.name,"Biceps").primary:e.muscle}))); if (p.journal) setJournal(p.journal); } } catch {} }, []);
-  useEffect(() => { try { localStorage.setItem("vm-state", JSON.stringify({ exercises, journal })); } catch {} }, [exercises, journal]);
+  useEffect(() => { try { const saved = localStorage.getItem("vm-state"); if (saved) { const p = JSON.parse(saved); if (p.exercises) setExercises(p.exercises.map((e:Exercise)=>({...e,muscle:e.muscle==="Back"?"Mid-Back":e.muscle==="Quads"?"Quadriceps":e.muscle==="Arms"?inferMuscles(e.name,"Biceps").primary:e.muscle}))); if (p.journal) setJournal(p.journal); if(p.records)setRecords(p.records); } } catch {} }, []);
+  useEffect(() => { try { localStorage.setItem("vm-state", JSON.stringify({ exercises, journal, records })); } catch {} }, [exercises, journal, records]);
   const trained = useMemo(() => Array.from(new Set(exercises.filter(e => e.done).map(e => e.muscle))), [exercises]);
   const momentum = Math.round((exercises.filter(e => e.done).length / Math.max(exercises.length, 1)) * 100);
   const msgPlayer = (func: string, args: number[] = []) => player.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "*");
@@ -111,7 +113,8 @@ export default function Home() {
   const addExercise = () => { const id=Date.now(); setExercises(x => [...x, { id, name: "New exercise", muscle: "Chest", sets: 3, reps: "10", weight: 0, duration: 0, difficulty: 6, done: false }]); return id; };
   const update = (id: number, patch: Partial<Exercise>) => setExercises(x => x.map(e => e.id === id ? { ...e, ...patch } : e));
   const remove = (id: number) => setExercises(x => x.filter(e => e.id !== id));
-  const upload = (files: FileList | null) => { if (!files) return; [...files].slice(0, 3).forEach(f => { const r = new FileReader(); r.onload = () => setPhotos(x => [...x, String(r.result)]); r.readAsDataURL(f); }); };
+  const addRecord=(type:ActivityRecord["type"],title:string,detail:string)=>setRecords(x=>[{id:Date.now()+Math.random(),date:new Date().toLocaleDateString("en-CA"),type,title,detail},...x]);
+  const upload = (files: FileList | null) => { if (!files) return; [...files].slice(0, 3).forEach(f => { const r = new FileReader(); r.onload = () => {setPhotos(x => [...x, String(r.result)]);addRecord("photo","Progress photo added",f.name)}; r.readAsDataURL(f); }); };
 
   return <main>
     <iframe ref={player} className="audio-frame" title="Vigor Momentum music" allow="autoplay" src="https://www.youtube.com/embed/-RcPZdihrp4?enablejsapi=1&loop=1&playlist=-RcPZdihrp4&controls=0" />
@@ -164,17 +167,18 @@ export default function Home() {
     {screen === "home" && <section className="app-shell">
       <aside>
         <Mark />
-        <nav>{([["today","Today","⌁"],["routine","Routine builder","＋"],["progress","Progress","↗"]] as [Tab,string,string][]).map(([id,label,icon]) => <button key={id} onClick={() => setTab(id)} className={tab === id ? "active" : ""}><span>{icon}</span>{label}</button>)}</nav>
+        <nav>{([["today","Today","⌁"],["routine","Routine builder","＋"],["progress","Progress","↗"],["calendar","Calendar","□"]] as [Tab,string,string][]).map(([id,label,icon]) => <button key={id} onClick={() => setTab(id)} className={tab === id ? "active" : ""}><span>{icon}</span>{label}</button>)}</nav>
         <div className="streak"><span>CONSISTENCY</span><strong>6 <small>WEEK<br />STREAK</small></strong><div>{[1,2,3,4,5,6,7].map((x,i)=><i key={x} className={i<6?"on":""}/>)}</div></div>
         <button className="profile"><span>{name.slice(0,1).toUpperCase()}</span><b>{name}<small>Example account</small></b><i>•••</i></button>
       </aside>
       <div className="workspace">
-        <header className="app-header"><div><span className="eyebrow">VIGOR MOMENTUM / {tab}</span><h2>{tab === "today" ? `Good morning, ${name}.` : tab === "routine" ? "Routine builder." : "Progress, made visible."}</h2></div><div className="header-actions"><button>⌕</button><button className="sound-btn" onClick={() => setMusicOpen(!musicOpen)}>{muted ? "♪̸" : "♫"}</button><span>{new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" }).toUpperCase()}</span></div></header>
+        <header className="app-header"><div><span className="eyebrow">VIGOR MOMENTUM / {tab}</span><h2>{tab === "today" ? `Good morning, ${name}.` : tab === "routine" ? "Routine builder." : tab === "progress" ? "Progress, made visible." : "Your training calendar."}</h2></div><div className="header-actions"><button>⌕</button><button className="sound-btn" onClick={() => setMusicOpen(!musicOpen)}>{muted ? "♪̸" : "♫"}</button><span>{new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" }).toUpperCase()}</span></div></header>
         {musicOpen && <div className="music-pop"><div><span>NOW PLAYING</span><b>Momentum mix</b></div><button onClick={toggleMusic}>{muted ? "PLAY" : "PAUSE"}</button><input aria-label="Music volume" type="range" min="0" max="100" value={volume} onChange={e=>changeVolume(+e.target.value)} /><small>{volume}%</small></div>}
 
         {tab === "today" && <Today exercises={exercises} update={update} momentum={momentum} trained={trained} setTab={setTab} />}
         {tab === "routine" && <Routine exercises={exercises} update={update} remove={remove} add={addExercise} targets={targets} notify={notify} />}
-        {tab === "progress" && <Progress exercises={exercises} update={update} trained={trained} journal={journal} setJournal={setJournal} photos={photos} upload={upload} notify={notify} />}
+        {tab === "progress" && <Progress exercises={exercises} update={update} trained={trained} journal={journal} setJournal={setJournal} photos={photos} upload={upload} notify={notify} addRecord={addRecord} />}
+        {tab === "calendar" && <Calendar records={records} />}
       </div>
     </section>}
   </main>;
@@ -239,7 +243,7 @@ function Routine({ exercises, update, remove, add, targets, notify }: { exercise
   </div>;
 }
 
-function Progress({ exercises, update, trained, journal, setJournal, photos, upload, notify }: { exercises:Exercise[];update:(id:number,p:Partial<Exercise>)=>void;trained:string[];journal:string;setJournal:(x:string)=>void;photos:string[];upload:(x:FileList|null)=>void;notify:(x:string)=>void }) {
+function Progress({ exercises, update, trained, journal, setJournal, photos, upload, notify, addRecord }: { exercises:Exercise[];update:(id:number,p:Partial<Exercise>)=>void;trained:string[];journal:string;setJournal:(x:string)=>void;photos:string[];upload:(x:FileList|null)=>void;notify:(x:string)=>void;addRecord:(type:ActivityRecord["type"],title:string,detail:string)=>void }) {
   const exerciseVolume=(e:Exercise)=>e.done?e.sets*(Number.parseFloat(e.reps)||0)*e.weight:0;
   const weeklyVolume=Math.round(exercises.reduce((sum,e)=>sum+exerciseVolume(e),0));
   const weekBars=[0,0,0,0,0,0,0];exercises.forEach((e,i)=>weekBars[i%7]+=exerciseVolume(e));
@@ -248,7 +252,16 @@ function Progress({ exercises, update, trained, journal, setJournal, photos, upl
   return <div className="progress-page fade-up">
     <div className="progress-grid"><section className="chart-card"><div className="volume-head"><span className="eyebrow">TOTAL VOLUME / THIS WEEK</span><button className="volume-reset" onClick={resetWeek} title="Reset weekly volume" aria-label="Reset weekly volume">↻ <span>RESET WEEK</span></button></div><div className="chart-title"><strong>{weeklyVolume.toLocaleString()} <small>KG</small></strong><span>{exercises.filter(e=>e.done).length} COMPLETED</span></div><div className="chart weekly-chart">{weekBars.map((v,i)=><i key={i} style={{height:`${Math.max(v?12:3,(v/maxDay)*100)}%`}}><b>{v?Math.round(v).toLocaleString():""}</b></i>)}</div><div className="axis week-axis">{["MON","TUE","WED","THU","FRI","SAT","SUN"].map(d=><span key={d}>{d}</span>)}</div></section>
       <section className="body-progress"><div><span className="eyebrow">MUSCLE BALANCE</span><h3>{trained.length || 0} groups</h3><p>trained this cycle</p></div><BodyMap active={trained}/></section></div>
-    <section className="log-card"><div className="card-head"><div><span className="eyebrow">SESSION LOG</span><h3>Today’s details</h3></div><span>Difficulty / 10</span></div><div className="log-head"><span>EXERCISE</span><span>SETS</span><span>REPS</span><span>KG</span><span>MIN</span><span>RPE</span></div>{exercises.map(e=><div className="log-row" key={e.id}><b>{e.name}<small>{e.muscle}</small></b><input type="number" value={e.sets} onChange={x=>update(e.id,{sets:+x.target.value})}/><input value={e.reps} onChange={x=>update(e.id,{reps:x.target.value})}/><input type="number" value={e.weight} onChange={x=>update(e.id,{weight:+x.target.value})}/><input type="number" value={e.duration} onChange={x=>update(e.id,{duration:+x.target.value})}/><input type="number" min="1" max="10" value={e.difficulty} onChange={x=>update(e.id,{difficulty:+x.target.value})}/></div>)}<button className="log-save" onClick={()=>notify("Session details logged.")}>Log session ↗</button></section>
-    <div className="journal-grid"><section className="journal"><span className="eyebrow">DAILY NOTE / {new Date().toLocaleDateString("en-CA",{month:"short",day:"2-digit"}).toUpperCase()}</span><h3>How did it feel?</h3><textarea value={journal} onChange={e=>setJournal(e.target.value)} /><button onClick={()=>notify("Journal entry saved.")}>Save entry ↗</button></section><section className="photos"><span className="eyebrow">PROGRESS PHOTOS / OPTIONAL</span><h3>See the long game.</h3><div className="photo-row">{photos.map((p,i)=><img key={i} src={p} alt={`Progress upload ${i+1}`}/>)}</div><label className="upload"><input type="file" accept="image/*" multiple onChange={e=>upload(e.target.files)}/><span>＋</span><b>Add photos<small>Private to this device</small></b></label></section></div>
+    <section className="log-card"><div className="card-head"><div><span className="eyebrow">SESSION LOG</span><h3>Today’s details</h3></div><span>Difficulty / 10</span></div><div className="log-head"><span>EXERCISE</span><span>SETS</span><span>REPS</span><span>KG</span><span>MIN</span><span>RPE</span></div>{exercises.map(e=><div className="log-row" key={e.id}><b>{e.name}<small>{e.muscle}</small></b><input type="number" value={e.sets} onChange={x=>update(e.id,{sets:+x.target.value})}/><input value={e.reps} onChange={x=>update(e.id,{reps:x.target.value})}/><input type="number" value={e.weight} onChange={x=>update(e.id,{weight:+x.target.value})}/><input type="number" value={e.duration} onChange={x=>update(e.id,{duration:+x.target.value})}/><input type="number" min="1" max="10" value={e.difficulty} onChange={x=>update(e.id,{difficulty:+x.target.value})}/></div>)}<button className="log-save" onClick={()=>{addRecord("session","Workout session logged",`${exercises.length} exercises · ${weeklyVolume.toLocaleString()} kg volume`);notify("Session details logged to Calendar.")}}>Log session ↗</button></section>
+    <div className="journal-grid"><section className="journal"><span className="eyebrow">DAILY NOTE / {new Date().toLocaleDateString("en-CA",{month:"short",day:"2-digit"}).toUpperCase()}</span><h3>How did it feel?</h3><textarea value={journal} onChange={e=>setJournal(e.target.value)} /><button onClick={()=>{addRecord("note","Daily fitness note",journal);notify("Journal entry saved to Calendar.")}}>Save entry ↗</button></section><section className="photos"><span className="eyebrow">PROGRESS PHOTOS / OPTIONAL</span><h3>See the long game.</h3><div className="photo-row">{photos.map((p,i)=><img key={i} src={p} alt={`Progress upload ${i+1}`}/>)}</div><label className="upload"><input type="file" accept="image/*" multiple onChange={e=>upload(e.target.files)}/><span>＋</span><b>Add photos<small>Private to this device · saved to Calendar</small></b></label></section></div>
   </div>;
+}
+
+function Calendar({records}:{records:ActivityRecord[]}){
+  const today=new Date(); const [cursor,setCursor]=useState(new Date(today.getFullYear(),today.getMonth(),1));
+  const todayKey=today.toLocaleDateString("en-CA"); const [selected,setSelected]=useState(todayKey);
+  const year=cursor.getFullYear(),month=cursor.getMonth(); const firstDay=new Date(year,month,1).getDay(); const days=new Date(year,month+1,0).getDate();
+  const cells=Array.from({length:42},(_,i)=>{const day=i-firstDay+1;return day>0&&day<=days?day:null});
+  const keyFor=(day:number)=>new Date(year,month,day).toLocaleDateString("en-CA"); const selectedRecords=records.filter(r=>r.date===selected);
+  return <div className="calendar-page fade-up"><div className="calendar-hero"><div><span className="eyebrow">TRAINING ARCHIVE / {records.length} ENTRIES</span><h1>Every day,<br/><em>remembered.</em></h1></div><div className="calendar-summary"><strong>{new Set(records.map(r=>r.date)).size}</strong><span>ACTIVE DAYS</span><strong>{records.filter(r=>r.type==="session").length}</strong><span>SESSIONS LOGGED</span></div></div><section className="calendar-shell"><div className="calendar-toolbar"><button onClick={()=>setCursor(new Date(year,month-1,1))}>←</button><h2>{cursor.toLocaleDateString("en-CA",{month:"long",year:"numeric"})}</h2><button onClick={()=>setCursor(new Date(year,month+1,1))}>→</button></div><div className="calendar-weekdays">{["SUN","MON","TUE","WED","THU","FRI","SAT"].map(d=><span key={d}>{d}</span>)}</div><div className="calendar-grid">{cells.map((day,i)=>{if(!day)return <div className="calendar-empty" key={i}/>;const key=keyFor(day),events=records.filter(r=>r.date===key);return <button key={key} className={`${key===selected?"selected":""} ${key===todayKey?"today-date":""}`} onClick={()=>setSelected(key)}><b>{day}</b><div>{events.slice(0,3).map(e=><span className={e.type} key={e.id}>{e.type==="session"?"SESSION":e.type==="note"?"NOTE":"PHOTO"}</span>)}</div>{events.length>3&&<small>+{events.length-3} more</small>}</button>})}</div></section><aside className="day-detail"><span className="eyebrow">SELECTED DAY</span><h3>{new Date(`${selected}T12:00:00`).toLocaleDateString("en-CA",{weekday:"long",month:"long",day:"numeric"})}</h3>{selectedRecords.length?<div className="calendar-events">{selectedRecords.map(e=><article key={e.id}><i className={e.type}/><div><span>{e.type.toUpperCase()}</span><b>{e.title}</b><p>{e.detail}</p></div></article>)}</div>:<div className="calendar-no-events"><b>○</b><p>No activity logged for this day.</p></div>}</aside></div>
 }
