@@ -195,15 +195,25 @@ function Today({ exercises, update, momentum, trained, setTab }: { exercises: Ex
 
 function Routine({ exercises, update, remove, add, targets, notify }: { exercises:Exercise[]; update:(id:number,p:Partial<Exercise>)=>void; remove:(id:number)=>void; add:()=>void; targets:string[]; notify:(x:string)=>void }) {
   const [prompt,setPrompt]=useState("");
+  const [filtersOpen,setFiltersOpen]=useState(false);
+  const [dayFilter,setDayFilter]=useState("all");
+  const [muscleFilter,setMuscleFilter]=useState("all");
+  const [minSets,setMinSets]=useState(0);
+  const [repsFilter,setRepsFilter]=useState("");
   const columnInfo = [{id:"monday",label:"Monday",dot:"blue"},{id:"tuesday",label:"Tuesday",dot:"amber"},{id:"wednesday",label:"Wednesday",dot:"green"},{id:"thursday",label:"Thursday",dot:"violet"},{id:"friday",label:"Friday",dot:"coral"},{id:"saturday",label:"Saturday",dot:"gold"},{id:"sunday",label:"Sunday",dot:"gray"}] as const;
   const [statuses,setStatuses]=useState<Record<number,string>>(()=>Object.fromEntries(exercises.map((e,i)=>[e.id,columnInfo[i%columnInfo.length].id])));
   useEffect(()=>setStatuses(old=>{const next={...old};exercises.forEach((e,i)=>{if(!next[e.id])next[e.id]=columnInfo[i%columnInfo.length].id});return next}),[exercises]);
   const move=(e:Exercise,status:string)=>setStatuses(x=>({...x,[e.id]:status}));
+  const visibleColumns=columnInfo.filter(col=>dayFilter==="all"||col.id===dayFilter);
+  const passesFilters=(e:Exercise)=>(muscleFilter==="all"||e.muscle===muscleFilter)&&e.sets>=minSets&&(!repsFilter||e.reps.toLowerCase().includes(repsFilter.toLowerCase()));
+  const filteredCount=exercises.filter(e=>passesFilters(e)&&(dayFilter==="all"||statuses[e.id]===dayFilter)).length;
+  const clearFilters=()=>{setDayFilter("all");setMuscleFilter("all");setMinSets(0);setRepsFilter("")};
   return <div className="builder board-builder fade-up">
     <div className="board-title"><div><span className="eyebrow">ROUTINE BUILDER / WEEKLY PROGRAM</span><h1>Shape the week.</h1><p>Plan each exercise by training day. Select any card to edit it.</p></div><button className="board-add" onClick={add}>＋ <b>Add task</b></button></div>
-    <div className="board-tools"><div className="view-tabs"><button className="active">Week</button><button>Timeline</button></div><div><button>▽ Filter</button><button>☷ Group: Day</button></div></div>
+    <div className="board-tools"><div className="view-tabs"><button className="active">Week</button><button>Timeline</button></div><div><button className={filtersOpen?"filter-active":""} onClick={()=>setFiltersOpen(!filtersOpen)}>▽ Filter {filteredCount}/{exercises.length}</button></div></div>
+    {filtersOpen&&<section className="routine-filters"><label>DAY<select value={dayFilter} onChange={e=>setDayFilter(e.target.value)}><option value="all">All days</option>{columnInfo.map(d=><option value={d.id} key={d.id}>{d.label}</option>)}</select></label><label>MINIMUM SETS<input type="number" min="0" value={minSets} onChange={e=>setMinSets(+e.target.value)}/></label><label>REPS<input value={repsFilter} onChange={e=>setRepsFilter(e.target.value)} placeholder="e.g. 10 or 8–12"/></label><label>MUSCLE WORKED<select value={muscleFilter} onChange={e=>setMuscleFilter(e.target.value)}><option value="all">All muscles</option>{MUSCLES.map(m=><option key={m}>{m}</option>)}</select></label><button onClick={clearFilters}>Clear all ×</button></section>}
     <section className="board-ai"><span>✦</span><div><label>BUILD WITH AI</label><input value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Describe the routine you want to build…" onKeyDown={e=>{if(e.key==="Enter"){notify("AI routine drafted — ready to refine.");setPrompt("")}}}/></div><button onClick={()=>{notify("AI routine drafted — ready to refine.");setPrompt("")}}>Generate →</button></section>
-    <div className="kanban weekly-kanban">{columnInfo.map(col=>{const cards=exercises.filter(e=>(statuses[e.id]||"monday")===col.id);return <section className="kanban-column" key={col.id}>
+    <div className={`kanban weekly-kanban ${dayFilter!=="all"?"single-day":""}`}>{visibleColumns.map(col=>{const cards=exercises.filter(e=>(statuses[e.id]||"monday")===col.id&&passesFilters(e));return <section className="kanban-column" key={col.id}>
       <header><div><i className={col.dot}/><b>{col.label}</b><span>{cards.length}</span></div><button onClick={add}>＋</button></header>
       <div className="kanban-cards">{cards.map((e,i)=><article className={`workout-card ${e.done?"done":""}`} key={e.id}>
         <div className="card-status"><label><input type="checkbox" checked={e.done} onChange={x=>update(e.id,{done:x.target.checked})}/><span>{e.done?"Complete":"Routine task"}</span></label><b className={e.difficulty>7?"high":e.difficulty>5?"medium":"low"}>{e.difficulty>7?"HIGH":e.difficulty>5?"MEDIUM":"LOW"}</b></div>
