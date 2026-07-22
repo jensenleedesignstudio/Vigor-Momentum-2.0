@@ -1,1 +1,0 @@
-"""Vigor Momentum application package."""

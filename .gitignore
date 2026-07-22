@@ -24,8 +24,6 @@
 
 # debug
 npm-debug.log*
-.devserver.*.log
-__pycache__/
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
