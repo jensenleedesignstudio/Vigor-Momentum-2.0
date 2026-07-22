@@ -83,6 +83,8 @@ export default function Home() {
   const [name, setName] = useState("Alex");
   const [days, setDays] = useState(4);
   const [targets, setTargets] = useState<string[]>(["Chest", "Mid-Back", "Quadriceps"]);
+  const [goal,setGoal]=useState("Build muscle");
+  const [experience,setExperience]=useState("Some experience");
   const [exercises, setExercises] = useState<Exercise[]>(seed);
   const [schedule,setSchedule]=useState<Record<number,string>>({1:"monday",2:"wednesday",3:"friday"});
   const [volume, setVolume] = useState(28);
@@ -106,10 +108,16 @@ export default function Home() {
   const notify = (s: string) => { setToast(s); setTimeout(() => setToast(""), 2400); };
 
   const createPlan = (goHome = false) => {
-    if (!goHome) {
-      const picked = targets.flatMap(m => ROUTINES[m] || []).slice(0, Math.max(4, days + 1));
-      if (picked.length) setExercises(picked.map((e, i) => ({ ...e, id: Date.now() + i, done: false, weight: 0, duration: 0, difficulty: 6 })));
-    }
+    if(goHome){setExercises([]);setSchedule({});setScreen("home");setTab("routine");return}
+    if(!targets.length){notify("Select at least one muscle group to create your routine.");return}
+    const prescriptions:Record<string,{sets:number;reps:string;difficulty:number}>={
+      "Build muscle":{sets:4,reps:"8–12",difficulty:7},"Get stronger":{sets:5,reps:"4–6",difficulty:8},"Lose fat":{sets:3,reps:"10–15",difficulty:7},"Improve endurance":{sets:3,reps:"15–20",difficulty:6},"Move better":{sets:3,reps:"8–12",difficulty:5}
+    };
+    const base=prescriptions[goal]||prescriptions["Build muscle"];
+    const picked=targets.flatMap(m=>ROUTINES[m]||[]);
+    const created=picked.map((e,i)=>{const beginner=experience==="Just starting",advanced=experience==="Advanced";return{...e,id:Date.now()+i,sets:beginner?Math.min(2,base.sets):advanced?base.sets+1:base.sets,reps:base.reps,done:false,weight:0,duration:0,difficulty:beginner?5:advanced?Math.max(8,base.difficulty):base.difficulty}});
+    const trainingDays:Record<number,string[]>={2:["monday","thursday"],3:["monday","wednesday","friday"],4:["monday","tuesday","thursday","saturday"],5:["monday","tuesday","wednesday","thursday","friday"],6:["monday","tuesday","wednesday","thursday","friday","saturday"]};
+    setExercises(created);setSchedule(Object.fromEntries(created.map((e,i)=>[e.id,trainingDays[days][i%trainingDays[days].length]])));
     setScreen("home"); setTab(goHome ? "routine" : "today");
   };
   const addExercise = () => { const id=Date.now(); setExercises(x => [...x, { id, name: "New exercise", muscle: "Chest", sets: 3, reps: "10", weight: 0, duration: 0, difficulty: 6, done: false }]); return id; };
@@ -147,8 +155,8 @@ export default function Home() {
       <div className="form-panel">
         <div className="measure"><label>Weight</label><div><input defaultValue="75" type="number" /><select><option>kg</option><option>lb</option></select></div></div>
         <div className="measure"><label>Height</label><div><input defaultValue="178" type="number" /><select><option>cm</option><option>ft/in</option></select></div></div>
-        <label>Primary goal<select><option>Build muscle</option><option>Get stronger</option><option>Lose fat</option><option>Improve endurance</option><option>Move better</option></select></label>
-        <label>Experience<select><option>Some experience</option><option>Just starting</option><option>Advanced</option></select></label>
+        <label>Primary goal<select value={goal} onChange={e=>setGoal(e.target.value)}><option>Build muscle</option><option>Get stronger</option><option>Lose fat</option><option>Improve endurance</option><option>Move better</option></select></label>
+        <label>Experience<select value={experience} onChange={e=>setExperience(e.target.value)}><option>Some experience</option><option>Just starting</option><option>Advanced</option></select></label>
         <button className="primary" onClick={() => setScreen("plan")}>Build vigor <b>→</b></button>
       </div>
       <div className="big-index">02</div>
