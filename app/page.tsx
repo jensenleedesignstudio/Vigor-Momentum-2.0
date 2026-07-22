@@ -53,6 +53,31 @@ function BodyMap({ active = ["Chest", "Back", "Quads"] }: { active?: string[] })
   </div>;
 }
 
+const MUSCLE_POINTS: Record<string, {x:number;y:number}[]> = {
+  Chest:[{x:31,y:29}], Back:[{x:69,y:34}], Shoulders:[{x:25,y:26},{x:37,y:26},{x:63,y:26},{x:76,y:26}], Arms:[{x:22,y:37},{x:40,y:37},{x:60,y:38},{x:78,y:38}], Core:[{x:31,y:41}], Glutes:[{x:69,y:55}], Quads:[{x:27,y:62},{x:35,y:62}], Hamstrings:[{x:66,y:65},{x:72,y:65}]
+};
+
+function inferMuscles(name:string, fallback:string) {
+  const n=name.toLowerCase();
+  const rules:[RegExp,string,string[]][]=[
+    [/bench|chest press|push.?up|fly|pec/,"Chest",["Shoulders","Arms"]],
+    [/row|pulldown|pull.?up|chin.?up|lat |deadlift/,"Back",["Arms","Hamstrings"]],
+    [/shoulder|overhead|military|lateral raise|front raise|arnold/,"Shoulders",["Arms"]],
+    [/curl|tricep|extension|pushdown|dip|skull|hammer/,"Arms",["Shoulders"]],
+    [/crunch|plank|sit.?up|ab |oblique|russian twist|leg raise/,"Core",[]],
+    [/hip thrust|glute|kickback|bridge/,"Glutes",["Hamstrings"]],
+    [/squat|leg press|lunge|step.?up|leg extension/,"Quads",["Glutes"]],
+    [/romanian|rdl|hamstring|leg curl|good morning/,"Hamstrings",["Glutes","Back"]]
+  ];
+  const match=rules.find(([pattern])=>pattern.test(n));
+  return match?{primary:match[1],secondary:match[2]}:{primary:fallback,secondary:[]};
+}
+
+function ExerciseMuscleMap({ name, muscle }: { name:string; muscle:string }) {
+  const detected=inferMuscles(name,muscle); const all=[detected.primary,...detected.secondary];
+  return <div className="exercise-map"><div className="anatomy-image">{all.flatMap((m,mi)=>(MUSCLE_POINTS[m]||[]).map((p,i)=><i className={mi===0?"primary":"secondary"} style={{left:`${p.x}%`,top:`${p.y}%`}} key={`${m}-${i}`}/>))}</div><div><span>AI MUSCLE MATCH</span><b>{detected.primary}</b>{detected.secondary.length>0&&<small>Supports: {detected.secondary.join(" + ")}</small>}</div></div>;
+}
+
 export default function Home() {
   const [screen, setScreen] = useState<Screen>("account");
   const [tab, setTab] = useState<Tab>("today");
@@ -184,8 +209,9 @@ function Routine({ exercises, update, remove, add, targets, notify }: { exercise
       <header><div><i className={col.dot}/><b>{col.label}</b><span>{cards.length}</span></div><button onClick={add}>＋</button></header>
       <div className="kanban-cards">{cards.map((e,i)=><article className={`workout-card ${col.id}`} key={e.id}>
         <div className="card-status"><label><input type="checkbox" checked={col.id==="done"} onChange={x=>move(e,x.target.checked?"done":"todo")}/><span>{col.id==="done"?"Complete":"Routine task"}</span></label><b className={e.difficulty>7?"high":e.difficulty>5?"medium":"low"}>{e.difficulty>7?"HIGH":e.difficulty>5?"MEDIUM":"LOW"}</b></div>
-        <input className="card-name" value={e.name} onChange={x=>update(e.id,{name:x.target.value})}/>
+        <input className="card-name" value={e.name} onChange={x=>{const detected=inferMuscles(x.target.value,e.muscle);update(e.id,{name:x.target.value,muscle:detected.primary})}}/>
         <p>{e.sets} sets × {e.reps} reps targeting {e.muscle.toLowerCase()}.</p>
+        <ExerciseMuscleMap name={e.name} muscle={e.muscle}/>
         <div className="card-fields"><select value={e.muscle} onChange={x=>update(e.id,{muscle:x.target.value})}>{MUSCLES.map(m=><option key={m}>{m}</option>)}</select><label>SETS<input type="number" min="1" value={e.sets} onChange={x=>update(e.id,{sets:+x.target.value})}/></label><label>REPS<input value={e.reps} onChange={x=>update(e.id,{reps:x.target.value})}/></label></div>
         <div className="card-foot"><span className="avatar">VM</span><select aria-label={`Move ${e.name}`} value={col.id} onChange={x=>move(e,x.target.value)}>{columnInfo.map(c=><option value={c.id} key={c.id}>{c.label}</option>)}</select><span>◷ {Math.max(30,e.sets*12)}m</span><button aria-label={`Remove ${e.name}`} onClick={()=>remove(e.id)}>×</button></div>
       </article>)}</div>
