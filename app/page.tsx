@@ -108,7 +108,7 @@ export default function Home() {
     }
     setScreen("home"); setTab(goHome ? "routine" : "today");
   };
-  const addExercise = () => setExercises(x => [...x, { id: Date.now(), name: "New exercise", muscle: "Chest", sets: 3, reps: "10", weight: 0, duration: 0, difficulty: 6, done: false }]);
+  const addExercise = () => { const id=Date.now(); setExercises(x => [...x, { id, name: "New exercise", muscle: "Chest", sets: 3, reps: "10", weight: 0, duration: 0, difficulty: 6, done: false }]); return id; };
   const update = (id: number, patch: Partial<Exercise>) => setExercises(x => x.map(e => e.id === id ? { ...e, ...patch } : e));
   const remove = (id: number) => setExercises(x => x.filter(e => e.id !== id));
   const upload = (files: FileList | null) => { if (!files) return; [...files].slice(0, 3).forEach(f => { const r = new FileReader(); r.onload = () => setPhotos(x => [...x, String(r.result)]); r.readAsDataURL(f); }); };
@@ -193,7 +193,7 @@ function Today({ exercises, update, momentum, trained, setTab }: { exercises: Ex
   </div>;
 }
 
-function Routine({ exercises, update, remove, add, targets, notify }: { exercises:Exercise[]; update:(id:number,p:Partial<Exercise>)=>void; remove:(id:number)=>void; add:()=>void; targets:string[]; notify:(x:string)=>void }) {
+function Routine({ exercises, update, remove, add, targets, notify }: { exercises:Exercise[]; update:(id:number,p:Partial<Exercise>)=>void; remove:(id:number)=>void; add:()=>number; targets:string[]; notify:(x:string)=>void }) {
   const [prompt,setPrompt]=useState("");
   const [filtersOpen,setFiltersOpen]=useState(false);
   const [dayFilter,setDayFilter]=useState("all");
@@ -204,17 +204,18 @@ function Routine({ exercises, update, remove, add, targets, notify }: { exercise
   const [statuses,setStatuses]=useState<Record<number,string>>(()=>Object.fromEntries(exercises.map((e,i)=>[e.id,columnInfo[i%columnInfo.length].id])));
   useEffect(()=>setStatuses(old=>{const next={...old};exercises.forEach((e,i)=>{if(!next[e.id])next[e.id]=columnInfo[i%columnInfo.length].id});return next}),[exercises]);
   const move=(e:Exercise,status:string)=>setStatuses(x=>({...x,[e.id]:status}));
+  const addToDay=(day:string)=>{const id=add();setStatuses(x=>({...x,[id]:day}));notify(`Exercise added to ${columnInfo.find(d=>d.id===day)?.label||day}.`)};
   const visibleColumns=columnInfo.filter(col=>dayFilter==="all"||col.id===dayFilter);
   const passesFilters=(e:Exercise)=>(muscleFilter==="all"||e.muscle===muscleFilter)&&e.sets>=minSets&&(!repsFilter||e.reps.toLowerCase().includes(repsFilter.toLowerCase()));
   const filteredCount=exercises.filter(e=>passesFilters(e)&&(dayFilter==="all"||statuses[e.id]===dayFilter)).length;
   const clearFilters=()=>{setDayFilter("all");setMuscleFilter("all");setMinSets(0);setRepsFilter("")};
   return <div className="builder board-builder fade-up">
-    <div className="board-title"><div><span className="eyebrow">ROUTINE BUILDER / WEEKLY PROGRAM</span><h1>Shape the week.</h1><p>Plan each exercise by training day. Select any card to edit it.</p></div><button className="board-add" onClick={add}>＋ <b>Add task</b></button></div>
+    <div className="board-title"><div><span className="eyebrow">ROUTINE BUILDER / WEEKLY PROGRAM</span><h1>Shape the week.</h1><p>Plan each exercise by training day. Select any card to edit it.</p></div><button className="board-add" onClick={()=>addToDay(dayFilter==="all"?"monday":dayFilter)}>＋ <b>Add task</b></button></div>
     <div className="board-tools"><div className="view-tabs"><button className="active">Week</button><button>Timeline</button></div><div><button className={filtersOpen?"filter-active":""} onClick={()=>setFiltersOpen(!filtersOpen)}>▽ Filter {filteredCount}/{exercises.length}</button></div></div>
     {filtersOpen&&<section className="routine-filters"><label>DAY<select value={dayFilter} onChange={e=>setDayFilter(e.target.value)}><option value="all">All days</option>{columnInfo.map(d=><option value={d.id} key={d.id}>{d.label}</option>)}</select></label><label>MINIMUM SETS<input type="number" min="0" value={minSets} onChange={e=>setMinSets(+e.target.value)}/></label><label>REPS<input value={repsFilter} onChange={e=>setRepsFilter(e.target.value)} placeholder="e.g. 10 or 8–12"/></label><label>MUSCLE WORKED<select value={muscleFilter} onChange={e=>setMuscleFilter(e.target.value)}><option value="all">All muscles</option>{MUSCLES.map(m=><option key={m}>{m}</option>)}</select></label><button onClick={clearFilters}>Clear all ×</button></section>}
     <section className="board-ai"><span>✦</span><div><label>BUILD WITH AI</label><input value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Describe the routine you want to build…" onKeyDown={e=>{if(e.key==="Enter"){notify("AI routine drafted — ready to refine.");setPrompt("")}}}/></div><button onClick={()=>{notify("AI routine drafted — ready to refine.");setPrompt("")}}>Generate →</button></section>
     <div className={`kanban weekly-kanban ${dayFilter!=="all"?"single-day":""}`}>{visibleColumns.map(col=>{const cards=exercises.filter(e=>(statuses[e.id]||"monday")===col.id&&passesFilters(e));return <section className="kanban-column" key={col.id}>
-      <header><div><i className={col.dot}/><b>{col.label}</b><span>{cards.length}</span></div><button onClick={add}>＋</button></header>
+      <header><div><i className={col.dot}/><b>{col.label}</b><span>{cards.length}</span></div><button onClick={()=>addToDay(col.id)}>＋</button></header>
       <div className="kanban-cards">{cards.map((e,i)=><article className={`workout-card ${e.done?"done":""}`} key={e.id}>
         <div className="card-status"><label><input type="checkbox" checked={e.done} onChange={x=>update(e.id,{done:x.target.checked})}/><span>{e.done?"Complete":"Routine task"}</span></label><b className={e.difficulty>7?"high":e.difficulty>5?"medium":"low"}>{e.difficulty>7?"HIGH":e.difficulty>5?"MEDIUM":"LOW"}</b></div>
         <input className="card-name" value={e.name} onChange={x=>{const detected=inferMuscles(x.target.value,e.muscle);update(e.id,{name:x.target.value,muscle:detected.primary})}}/>
@@ -223,7 +224,7 @@ function Routine({ exercises, update, remove, add, targets, notify }: { exercise
         <div className="card-fields"><select value={e.muscle} onChange={x=>update(e.id,{muscle:x.target.value})}>{MUSCLES.map(m=><option key={m}>{m}</option>)}</select><label>SETS<input type="number" min="1" value={e.sets} onChange={x=>update(e.id,{sets:+x.target.value})}/></label><label>REPS<input value={e.reps} onChange={x=>update(e.id,{reps:x.target.value})}/></label></div>
         <div className="card-foot"><span className="avatar">VM</span><select aria-label={`Move ${e.name}`} value={col.id} onChange={x=>move(e,x.target.value)}>{columnInfo.map(c=><option value={c.id} key={c.id}>{c.label}</option>)}</select><span>◷ {Math.max(30,e.sets*12)}m</span><button aria-label={`Remove ${e.name}`} onClick={()=>remove(e.id)}>×</button></div>
       </article>)}</div>
-      <button className="column-add" onClick={add}>＋ Add exercise</button>
+      <button className="column-add" onClick={()=>addToDay(col.id)}>＋ Add exercise to {col.label}</button>
     </section>})}</div>
     <div className="board-footer"><div><span>AUTO-SAVED LOCALLY</span><small>{exercises.length} exercises · {Array.from(new Set(exercises.map(e=>e.muscle))).length} muscle groups</small></div><button onClick={()=>notify("Routine saved. Momentum secured.")}>Save routine ↗</button></div>
   </div>;
