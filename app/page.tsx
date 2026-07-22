@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Screen = "account" | "intro" | "profile" | "plan" | "home";
-type Tab = "today" | "routine" | "progress" | "calendar";
+type Tab = "today" | "routine" | "catalogue" | "progress" | "calendar";
 type Exercise = { id: number; name: string; muscle: string; sets: number; reps: string; weight: number; duration: number; difficulty: number; done: boolean };
 type ActivityRecord = { id:number; date:string; type:"session"|"note"|"photo"; title:string; detail:string; data?:string };
+type CatalogueItem={id:number;category:string;name:string;equipment:string;muscles:string;sets:number;reps:string};
 
 const MUSCLES = ["Chest", "Upper Back", "Mid-Back", "Lower Back", "Shoulders", "Biceps", "Triceps", "Core", "Glutes", "Quadriceps", "Hamstrings", "Calves"];
 const MUSCLE_INFO: Record<string,string> = {
@@ -19,6 +20,108 @@ const ROUTINES: Record<string, Omit<Exercise, "id" | "done" | "weight" | "durati
   Glutes: [{ name: "Barbell hip thrust", muscle: "Glutes", sets: 4, reps: "8–10" }, { name: "Bulgarian split squat", muscle: "Glutes", sets: 3, reps: "10 / side" }],
   Hamstrings:[{name:"Romanian deadlift",muscle:"Hamstrings",sets:4,reps:"8–10"}], Calves:[{name:"Standing calf raise",muscle:"Calves",sets:4,reps:"12–15"}]
 };
+
+const CATALOGUE:CatalogueItem[]=`
+Chest|Barbell Bench Press|Barbell + Bench|Mid Chest, Triceps, Front Delts|4|6–8
+Chest|Incline Barbell Press|Barbell + Incline Bench|Upper Chest|4|6–10
+Chest|Decline Barbell Press|Barbell + Decline Bench|Lower Chest|3|8–10
+Chest|Flat Dumbbell Press|Dumbbells|Chest|3|8–12
+Chest|Incline Dumbbell Press|Dumbbells|Upper Chest|3|8–12
+Chest|Decline Dumbbell Press|Dumbbells|Lower Chest|3|8–12
+Chest|Machine Chest Press|Chest Press Machine|Chest|3|10–12
+Chest|Pec Deck Fly|Pec Deck Machine|Chest|3|12–15
+Chest|Cable Fly (High→Low)|Cable Machine|Lower Chest|3|12–15
+Chest|Cable Fly (Low→High)|Cable Machine|Upper Chest|3|12–15
+Chest|Flat Cable Fly|Cable Machine|Chest|3|12–15
+Chest|Push-up|Bodyweight|Chest|3|AMRAP
+Chest|Weighted Push-up|Weight Plate|Chest|3|8–15
+Chest|Chest Dips|Dip Bars|Lower Chest|3|8–12
+Chest|Smith Machine Bench|Smith Machine|Chest|3|8–10
+Back|Conventional Deadlift|Barbell|Entire Posterior Chain|4|3–6
+Back|Bent Over Row|Barbell|Lats, Rhomboids|4|6–10
+Back|Pendlay Row|Barbell|Upper Back|4|5–8
+Back|T-Bar Row|T-Bar Machine|Mid Back|3|8–12
+Back|Chest Supported Row|Machine|Upper Back|3|10–12
+Back|Single Arm DB Row|Dumbbell|Lats|3|10
+Back|Lat Pulldown (Wide)|Cable|Lats|3|8–12
+Back|Lat Pulldown (Close)|Cable|Lower Lats|3|10–12
+Back|Neutral Grip Pulldown|Cable|Lats|3|10–12
+Back|Pull-up|Pull-up Bar|Lats|3|AMRAP
+Back|Chin-up|Pull-up Bar|Lats, Biceps|3|AMRAP
+Back|Straight Arm Pulldown|Cable|Lats|3|12–15
+Back|Seated Cable Row|Cable|Mid Back|3|10–12
+Back|Machine Row|Machine|Back|3|10–12
+Back|Rack Pull|Barbell|Upper Back, Traps|4|5–8
+Shoulders|Standing Overhead Press|Barbell|Front Delts|4|6–8
+Shoulders|Seated Dumbbell Press|Dumbbells|Shoulders|3|8–12
+Shoulders|Arnold Press|Dumbbells|All Delts|3|10–12
+Shoulders|Machine Shoulder Press|Machine|Front Delts|3|10
+Shoulders|Lateral Raise|Dumbbells|Side Delts|3|12–15
+Shoulders|Cable Lateral Raise|Cable|Side Delts|3|12–15
+Shoulders|Machine Lateral Raise|Machine|Side Delts|3|12–15
+Shoulders|Front Raise|Plate/Dumbbell|Front Delts|3|12
+Shoulders|Cable Front Raise|Cable|Front Delts|3|12
+Shoulders|Rear Delt Fly|Machine|Rear Delts|3|12–15
+Shoulders|Reverse Pec Deck|Machine|Rear Delts|3|12–15
+Shoulders|Face Pull|Cable|Rear Delts, Rotator Cuff|3|12–15
+Shoulders|Upright Row|Barbell/EZ Bar|Side Delts, Traps|3|10
+Shoulders|Landmine Press|Landmine|Front Delts|3|10
+Shoulders|Cable Y Raise|Cable|Upper Traps, Rear Delts|3|12
+Biceps|Barbell Curl|Barbell|Biceps|3|8–10
+Biceps|EZ Bar Curl|EZ Bar|Biceps|3|10
+Biceps|Alternating DB Curl|Dumbbells|Biceps|3|10
+Biceps|Hammer Curl|Dumbbells|Brachialis|3|10–12
+Biceps|Incline Curl|Dumbbells|Long Head|3|10–12
+Biceps|Preacher Curl|EZ Bar|Biceps|3|10–12
+Biceps|Machine Preacher Curl|Machine|Biceps|3|10
+Biceps|Cable Curl|Cable|Biceps|3|12
+Biceps|Bayesian Curl|Cable|Long Head|3|12
+Biceps|Spider Curl|Bench + EZ Bar|Short Head|3|10
+Biceps|Concentration Curl|Dumbbell|Peak|3|12
+Biceps|Reverse Curl|EZ Bar|Brachioradialis|3|12
+Biceps|Cross Body Hammer Curl|Dumbbell|Brachialis|3|10
+Triceps|Close Grip Bench|Barbell|Triceps|4|6–8
+Triceps|Skull Crushers|EZ Bar|Long Head|3|10
+Triceps|Overhead EZ Extension|EZ Bar|Long Head|3|10
+Triceps|Overhead DB Extension|Dumbbell|Long Head|3|10–12
+Triceps|Cable Pushdown|Cable|Triceps|3|12
+Triceps|Rope Pushdown|Cable|Triceps|3|12
+Triceps|Reverse Grip Pushdown|Cable|Medial Head|3|12
+Triceps|Single Arm Pushdown|Cable|Triceps|3|12
+Triceps|Bench Dips|Bench|Triceps|3|AMRAP
+Triceps|Weighted Dips|Dip Belt|Chest/Triceps|3|8–12
+Triceps|Machine Dip|Machine|Triceps|3|10
+Triceps|Kickbacks|Dumbbell|Triceps|3|15
+Legs|Back Squat|Barbell|Quads, Glutes|4|6–8
+Legs|Front Squat|Barbell|Quads|4|6–8
+Legs|Hack Squat|Machine|Quads|3|8–12
+Legs|Leg Press|Machine|Quads|3|10
+Legs|Bulgarian Split Squat|Dumbbells|Quads, Glutes|3|10
+Legs|Walking Lunges|Dumbbells|Legs|3|12
+Legs|Reverse Lunges|Dumbbells|Glutes|3|10
+Legs|Romanian Deadlift|Barbell|Hamstrings|4|8
+Legs|Stiff Leg Deadlift|Barbell|Hamstrings|3|8
+Legs|Leg Extension|Machine|Quads|3|12–15
+Legs|Seated Leg Curl|Machine|Hamstrings|3|12
+Legs|Lying Leg Curl|Machine|Hamstrings|3|12
+Legs|Nordic Curl|Bodyweight|Hamstrings|3|6–8
+Legs|Hip Thrust|Barbell|Glutes|4|8–10
+Legs|Cable Kickback|Cable|Glutes|3|15
+Legs|Glute Bridge|Barbell|Glutes|3|10
+Legs|Standing Calf Raise|Machine|Calves|4|12–15
+Legs|Seated Calf Raise|Machine|Soleus|4|15
+Legs|Donkey Calf Raise|Machine|Calves|3|15
+Legs|Goblet Squat|Dumbbell|Quads|3|12
+Core|Hanging Leg Raise|Pull-up Bar|Lower Abs|3|10–15
+Core|Captain's Chair Raise|Machine|Lower Abs|3|12
+Core|Cable Crunch|Cable|Abs|3|15
+Core|Decline Sit-up|Bench|Abs|3|15
+Core|Ab Wheel Rollout|Ab Wheel|Core|3|10–15
+Core|Plank|Bodyweight|Core|3|30–90 sec
+Core|Side Plank|Bodyweight|Obliques|3|30–60 sec
+Core|Russian Twist|Plate|Obliques|3|20
+Core|Pallof Press|Cable|Core Stability|3|12
+Core|Wood Chop|Cable|Obliques|3|12`.trim().split("\n").map((line,i)=>{const [category,name,equipment,muscles,sets,reps]=line.split("|");return{id:i+1,category,name,equipment,muscles,sets:+sets,reps}});
 
 const seed: Exercise[] = [
   { id: 1, name: "Barbell back squat", muscle: "Quadriceps", sets: 4, reps: "8", weight: 82.5, duration: 0, difficulty: 7, done: true },
@@ -126,6 +229,7 @@ export default function Home() {
     setScreen("home"); setTab(goHome ? "routine" : "today");
   };
   const addExercise = () => { const id=Date.now(); setExercises(x => [...x, { id, name: "New exercise", muscle: "Chest", sets: 3, reps: "10", weight: 0, duration: 0, difficulty: 6, done: false }]); return id; };
+  const addFromCatalogue=(item:CatalogueItem,day:string)=>{const id=Date.now()+Math.floor(Math.random()*1000);const fallback=item.category==="Back"?"Mid-Back":item.category==="Legs"?"Quadriceps":item.category;const muscle=inferMuscles(item.name,fallback).primary;setExercises(x=>[...x,{id,name:item.name,muscle,sets:item.sets,reps:item.reps,weight:0,duration:0,difficulty:6,done:false}]);setSchedule(x=>({...x,[id]:day}));notify(`${item.name} added to ${day[0].toUpperCase()+day.slice(1)}.`)};
   const update = (id: number, patch: Partial<Exercise>) => setExercises(x => x.map(e => e.id === id ? { ...e, ...patch } : e));
   const remove = (id: number) => setExercises(x => x.filter(e => e.id !== id));
   const addRecord=(type:ActivityRecord["type"],title:string,detail:string,data?:string)=>setRecords(x=>[{id:Date.now()+Math.random(),date:new Date().toLocaleDateString("en-CA"),type,title,detail,data},...x]);
@@ -182,16 +286,17 @@ export default function Home() {
     {screen === "home" && <section className="app-shell">
       <aside>
         <Mark onClick={()=>setScreen("account")} />
-        <nav>{([["today","Today","⌁"],["routine","Routine builder","＋"],["progress","Progress","↗"],["calendar","Calendar","□"]] as [Tab,string,string][]).map(([id,label,icon]) => <button key={id} onClick={() => setTab(id)} className={tab === id ? "active" : ""}><span>{icon}</span>{label}</button>)}</nav>
+        <nav>{([["today","Today","⌁"],["routine","Routine builder","＋"],["catalogue","Catalogue","▦"],["progress","Progress","↗"],["calendar","Calendar","□"]] as [Tab,string,string][]).map(([id,label,icon]) => <button key={id} onClick={() => setTab(id)} className={tab === id ? "active" : ""}><span>{icon}</span>{label}</button>)}</nav>
         <div className="streak"><span>CONSISTENCY / THIS WEEK</span><strong>{consistencyDays} <small>DAYS<br />TRAINED</small></strong><div>{[1,2,3,4,5,6,7].map((x,i)=><i key={x} className={i<consistencyDays?"on":""}/>)}</div></div>
         <button className="profile" onClick={()=>setSettingsOpen(true)} aria-label="Open profile settings"><span>{name.slice(0,1).toUpperCase()}</span><b>{name}<small>{height} {heightUnit} · {weight} {weightUnit}</small></b><i>•••</i></button>
       </aside>
       <div className="workspace">
-        <header className="app-header"><div><span className="eyebrow">VIGOR MOMENTUM / {tab}</span><h2>{tab === "today" ? `Good morning, ${name}.` : tab === "routine" ? "Routine builder." : tab === "progress" ? "Progress, made visible." : "Your training calendar."}</h2></div><div className="header-actions"><button>⌕</button><button className="sound-btn" onClick={() => setMusicOpen(!musicOpen)}>{muted ? "♪̸" : "♫"}</button><span>{new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" }).toUpperCase()}</span></div></header>
+        <header className="app-header"><div><span className="eyebrow">VIGOR MOMENTUM / {tab}</span><h2>{tab === "today" ? `Good morning, ${name}.` : tab === "routine" ? "Routine builder." : tab === "catalogue" ? "Exercise catalogue." : tab === "progress" ? "Progress, made visible." : "Your training calendar."}</h2></div><div className="header-actions"><button onClick={()=>setTab("catalogue")} aria-label="Search exercise catalogue">⌕</button><button className="sound-btn" onClick={() => setMusicOpen(!musicOpen)}>{muted ? "♪̸" : "♫"}</button><span>{new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" }).toUpperCase()}</span></div></header>
         {musicOpen && <div className="music-pop"><div><span>NOW PLAYING</span><b>Momentum mix</b></div><button onClick={toggleMusic}>{muted ? "PLAY" : "PAUSE"}</button><input aria-label="Music volume" type="range" min="0" max="100" value={volume} onChange={e=>changeVolume(+e.target.value)} /><small>{volume}%</small></div>}
 
         {tab === "today" && <Today exercises={exercises} update={update} momentum={momentum} trained={trained} setTab={setTab} />}
         {tab === "routine" && <Routine exercises={exercises} update={update} remove={remove} add={addExercise} targets={targets} notify={notify} statuses={schedule} setStatuses={setSchedule} />}
+        {tab === "catalogue" && <Catalogue addExercise={addFromCatalogue} />}
         {tab === "progress" && <Progress exercises={exercises} update={update} trained={trained} journal={journal} setJournal={setJournal} photos={photos} upload={upload} notify={notify} addRecord={addRecord} />}
         {tab === "calendar" && <Calendar records={records} />}
       </div>
@@ -211,6 +316,14 @@ function Today({ exercises, update, momentum, trained, setTab }: { exercises: Ex
     <section className="body-card"><div><span className="eyebrow">THIS WEEK / BODY MAP</span><h3>Work, mapped.</h3><p>Trained muscles illuminate as you log your sessions.</p><div className="legend"><i/> TRAINED <i/> RECOVERING</div></div><BodyMap active={trained}/></section>
     <section className="quote-card"><span>“</span><p>We are what we repeatedly do. Excellence, then, is not an act, but a habit.</p><small>— ARISTOTLE</small></section>
   </div>;
+}
+
+function Catalogue({addExercise}:{addExercise:(item:CatalogueItem,day:string)=>void}){
+  const [query,setQuery]=useState("");const [category,setCategory]=useState("All");const [day,setDay]=useState("monday");
+  const categories=["All",...Array.from(new Set(CATALOGUE.map(item=>item.category)))];
+  const results=CATALOGUE.filter(item=>(category==="All"||item.category===category)&&`${item.name} ${item.equipment} ${item.muscles}`.toLowerCase().includes(query.toLowerCase()));
+  const fallback=(item:CatalogueItem)=>item.category==="Back"?"Mid-Back":item.category==="Legs"?"Quadriceps":item.category;
+  return <div className="catalogue-page fade-up"><section className="catalogue-hero"><div><span className="eyebrow">EXERCISE LIBRARY / 100 MOVEMENTS</span><h1>Find the next<br/><em>movement.</em></h1><p>Search the complete strength catalogue, inspect the target area, then add any movement directly to your week.</p></div><div className="catalogue-controls"><label className="catalogue-search"><span>⌕</span><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search exercise, equipment, or muscle…"/></label><label>ADD EXERCISES TO<select value={day} onChange={e=>setDay(e.target.value)}>{["monday","tuesday","wednesday","thursday","friday","saturday","sunday"].map(d=><option value={d} key={d}>{d[0].toUpperCase()+d.slice(1)}</option>)}</select></label></div></section><nav className="catalogue-categories">{categories.map(cat=><button className={category===cat?"active":""} onClick={()=>setCategory(cat)} key={cat}>{cat}<span>{cat==="All"?CATALOGUE.length:CATALOGUE.filter(item=>item.category===cat).length}</span></button>)}</nav><div className="catalogue-result-head"><span>{results.length} RESULTS</span><span>IDEAL WORKING SETS</span></div><section className="catalogue-grid">{results.map(item=>{const muscle=inferMuscles(item.name,fallback(item)).primary;return <article className="catalogue-card" key={item.id}><div className="catalogue-number">{String(item.id).padStart(3,"0")}<span>{item.category}</span></div><div className="catalogue-thumb"><div className="anatomy-image">{(MUSCLE_POINTS[muscle]||[]).map((p,i)=><i className={`primary ${muscle.toLowerCase().replaceAll(" ","-")}`} style={{left:`${p.x}%`,top:`${p.y}%`}} key={i}/>)}</div></div><div className="catalogue-info"><h3>{item.name}</h3><dl><div><dt>EQUIPMENT</dt><dd>{item.equipment}</dd></div><div><dt>PRIMARY MUSCLES</dt><dd>{item.muscles}</dd></div></dl></div><div className="catalogue-prescription"><strong>{item.sets}<small>SETS</small></strong><b>×</b><strong>{item.reps}<small>REPS</small></strong></div><button onClick={()=>addExercise(item,day)}>＋ Add to {day.slice(0,3)}.</button></article>})}</section>{!results.length&&<div className="catalogue-empty"><b>No movements found.</b><p>Try another exercise, equipment type, or muscle group.</p></div>}</div>
 }
 
 function Routine({ exercises, update, remove, add, targets, notify, statuses, setStatuses }: { exercises:Exercise[]; update:(id:number,p:Partial<Exercise>)=>void; remove:(id:number)=>void; add:()=>number; targets:string[]; notify:(x:string)=>void;statuses:Record<number,string>;setStatuses:React.Dispatch<React.SetStateAction<Record<number,string>>> }) {
