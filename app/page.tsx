@@ -23,7 +23,19 @@ const seed: Exercise[] = [
 function Mark() { return <span className="mark">VM<span>●</span></span>; }
 
 function TypeText({ text, delay = 0, className = "" }: { text: string; delay?: number; className?: string }) {
-  return <span className={`typed-text ${className}`} aria-label={text}>{[...text].map((letter, i) => <span aria-hidden="true" className="typed-letter" style={{ animationDelay: `${delay + i * 0.065}s` }} key={`${letter}-${i}`}>{letter === " " ? "\u00a0" : letter}</span>)}</span>;
+  const [visible, setVisible] = useState(0);
+  useEffect(() => {
+    setVisible(0);
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const start = setTimeout(() => {
+      timer = setInterval(() => setVisible(count => {
+        if (count >= text.length) { if (timer) clearInterval(timer); return count; }
+        return count + 1;
+      }), 105);
+    }, delay * 1000);
+    return () => { clearTimeout(start); if (timer) clearInterval(timer); };
+  }, [text, delay]);
+  return <span className={`typed-text ${className}`} aria-label={text}><span aria-hidden="true">{text.slice(0, visible).replaceAll(" ", "\u00a0")}</span><i className={visible >= text.length ? "typed-caret done" : "typed-caret"} aria-hidden="true" /></span>;
 }
 
 function BodyMap({ active = ["Chest", "Back", "Quads"] }: { active?: string[] }) {
