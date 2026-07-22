@@ -6,18 +6,23 @@ type Screen = "account" | "intro" | "profile" | "plan" | "home";
 type Tab = "today" | "routine" | "progress";
 type Exercise = { id: number; name: string; muscle: string; sets: number; reps: string; weight: number; duration: number; difficulty: number; done: boolean };
 
-const MUSCLES = ["Chest", "Back", "Shoulders", "Arms", "Core", "Glutes", "Quads", "Hamstrings"];
+const MUSCLES = ["Chest", "Upper Back", "Mid-Back", "Lower Back", "Shoulders", "Biceps", "Triceps", "Core", "Glutes", "Quadriceps", "Hamstrings", "Calves"];
+const MUSCLE_INFO: Record<string,string> = {
+  Chest:"Front upper torso · pushing", "Upper Back":"Traps & rhomboids · posture", "Mid-Back":"Lats · pulling", "Lower Back":"Erector spinae · torso support", Shoulders:"Deltoids · raises the arms", Biceps:"Front upper arm · bends the elbow", Triceps:"Back upper arm · straightens the elbow", Core:"Abs & obliques · spine stability", Glutes:"Hip drive and extension", Quadriceps:"Front thigh · straightens the knee", Hamstrings:"Back thigh · bends the knee", Calves:"Lower leg · jumping and plantar flexion"
+};
 const ROUTINES: Record<string, Omit<Exercise, "id" | "done" | "weight" | "duration" | "difficulty">[]> = {
   Chest: [{ name: "Incline dumbbell press", muscle: "Chest", sets: 4, reps: "8–10" }, { name: "Cable fly", muscle: "Chest", sets: 3, reps: "12–15" }],
-  Back: [{ name: "Lat pulldown", muscle: "Back", sets: 4, reps: "8–12" }, { name: "Chest-supported row", muscle: "Back", sets: 3, reps: "10–12" }],
-  Quads: [{ name: "Back squat", muscle: "Quads", sets: 4, reps: "6–8" }, { name: "Walking lunge", muscle: "Quads", sets: 3, reps: "10 / side" }],
+  "Upper Back": [{ name: "Face pull", muscle: "Upper Back", sets: 3, reps: "12–15" }], "Mid-Back": [{ name: "Lat pulldown", muscle: "Mid-Back", sets: 4, reps: "8–12" }, { name: "Chest-supported row", muscle: "Mid-Back", sets: 3, reps: "10–12" }], "Lower Back": [{ name: "Back extension", muscle: "Lower Back", sets: 3, reps: "12" }],
+  Shoulders:[{name:"Dumbbell shoulder press",muscle:"Shoulders",sets:3,reps:"8–10"}], Biceps:[{name:"Hammer curl",muscle:"Biceps",sets:3,reps:"10–12"}], Triceps:[{name:"Cable pushdown",muscle:"Triceps",sets:3,reps:"10–12"}], Core:[{name:"Plank",muscle:"Core",sets:3,reps:"45 sec"}],
+  Quadriceps: [{ name: "Back squat", muscle: "Quadriceps", sets: 4, reps: "6–8" }, { name: "Walking lunge", muscle: "Quadriceps", sets: 3, reps: "10 / side" }],
   Glutes: [{ name: "Barbell hip thrust", muscle: "Glutes", sets: 4, reps: "8–10" }, { name: "Bulgarian split squat", muscle: "Glutes", sets: 3, reps: "10 / side" }],
+  Hamstrings:[{name:"Romanian deadlift",muscle:"Hamstrings",sets:4,reps:"8–10"}], Calves:[{name:"Standing calf raise",muscle:"Calves",sets:4,reps:"12–15"}]
 };
 
 const seed: Exercise[] = [
-  { id: 1, name: "Barbell back squat", muscle: "Quads", sets: 4, reps: "8", weight: 82.5, duration: 0, difficulty: 7, done: true },
+  { id: 1, name: "Barbell back squat", muscle: "Quadriceps", sets: 4, reps: "8", weight: 82.5, duration: 0, difficulty: 7, done: true },
   { id: 2, name: "Incline dumbbell press", muscle: "Chest", sets: 3, reps: "10", weight: 27.5, duration: 0, difficulty: 8, done: true },
-  { id: 3, name: "Chest-supported row", muscle: "Back", sets: 3, reps: "12", weight: 45, duration: 0, difficulty: 7, done: false },
+  { id: 3, name: "Chest-supported row", muscle: "Mid-Back", sets: 3, reps: "12", weight: 45, duration: 0, difficulty: 7, done: false },
 ];
 
 function Mark() { return <span className="mark">VM<span>●</span></span>; }
@@ -38,25 +43,29 @@ function TypeText({ text, delay = 0, className = "" }: { text: string; delay?: n
   return <span className={`typed-text ${className}`} aria-label={text}><span aria-hidden="true">{text.slice(0, visible).replaceAll(" ", "\u00a0")}</span><i className={visible >= text.length ? "typed-caret done" : "typed-caret"} aria-hidden="true" /></span>;
 }
 
-function BodyMap({ active = ["Chest", "Back", "Quads"] }: { active?: string[] }) {
-  return <div className="body-wrap clinical-body" aria-label={`Muscles trained: ${active.join(", ")}`}><div className="clinical-anatomy">{active.flatMap((m,mi)=>(MUSCLE_POINTS[m]||[]).map((p,i)=><i className={`${mi===0?"primary ":""}${m.toLowerCase()}`} style={{left:`${p.x}%`,top:`${p.y}%`}} key={`${m}-${i}`}/>))}</div><div className="clinical-legend"><span>FRONT</span><b>{active.length ? active.join(" · ") : "No training logged"}</b><span>BACK</span></div></div>;
+function BodyMap({ active = ["Chest", "Mid-Back", "Quadriceps"] }: { active?: string[] }) {
+  return <div className="body-wrap clinical-body" aria-label={`Muscles trained: ${active.join(", ")}`}><div className="clinical-anatomy">{active.flatMap((m,mi)=>(MUSCLE_POINTS[m]||[]).map((p,i)=><i className={`${mi===0?"primary ":""}${m.toLowerCase().replaceAll(" ","-")}`} style={{left:`${p.x}%`,top:`${p.y}%`}} key={`${m}-${i}`}/>))}</div><div className="clinical-legend"><span>FRONT</span><b>{active.length ? active.join(" · ") : "No training logged"}</b><span>BACK</span></div></div>;
 }
 
 const MUSCLE_POINTS: Record<string, {x:number;y:number}[]> = {
-  Chest:[{x:28,y:25}], Back:[{x:72,y:31}], Shoulders:[{x:22,y:23},{x:34,y:23},{x:66,y:23},{x:78,y:23}], Arms:[{x:19,y:34},{x:37,y:34},{x:63,y:34},{x:81,y:34}], Core:[{x:28,y:37}], Glutes:[{x:72,y:51}], Quads:[{x:25,y:59},{x:31,y:59}], Hamstrings:[{x:69,y:61},{x:75,y:61}]
+  Chest:[{x:28,y:25}], "Upper Back":[{x:72,y:23}], "Mid-Back":[{x:72,y:32}], "Lower Back":[{x:72,y:42}], Shoulders:[{x:22,y:23},{x:34,y:23},{x:66,y:23},{x:78,y:23}], Biceps:[{x:20,y:32},{x:36,y:32}], Triceps:[{x:64,y:32},{x:80,y:32}], Core:[{x:28,y:37}], Glutes:[{x:72,y:51}], Quadriceps:[{x:25,y:59},{x:31,y:59}], Hamstrings:[{x:69,y:61},{x:75,y:61}], Calves:[{x:69,y:76},{x:75,y:76}], Back:[{x:72,y:31}], Quads:[{x:25,y:59},{x:31,y:59}], Arms:[{x:20,y:32},{x:36,y:32}]
 };
 
 function inferMuscles(name:string, fallback:string) {
   const n=name.toLowerCase();
   const rules:[RegExp,string,string[]][]=[
-    [/bench|chest press|push.?up|fly|pec/,"Chest",["Shoulders","Arms"]],
-    [/row|pulldown|pull.?up|chin.?up|lat |deadlift/,"Back",["Arms","Hamstrings"]],
-    [/shoulder|overhead|military|lateral raise|front raise|arnold/,"Shoulders",["Arms"]],
-    [/curl|tricep|extension|pushdown|dip|skull|hammer/,"Arms",["Shoulders"]],
+    [/bench|chest press|push.?up|fly|pec/,"Chest",["Shoulders","Triceps"]],
+    [/shrug|face pull|reverse fly|high row|trap|rhomboid/,"Upper Back",["Shoulders"]],
+    [/row|pulldown|pull.?up|chin.?up|lat /,"Mid-Back",["Biceps","Upper Back"]],
+    [/back extension|hyperextension|superman|good morning/,"Lower Back",["Hamstrings","Glutes"]],
+    [/shoulder|overhead|military|lateral raise|front raise|arnold/,"Shoulders",["Triceps"]],
+    [/curl|hammer|preacher|chin.?up/,"Biceps",["Mid-Back"]],
+    [/tricep|pushdown|dip|skull|close.grip/,"Triceps",["Chest","Shoulders"]],
     [/crunch|plank|sit.?up|ab |oblique|russian twist|leg raise/,"Core",[]],
     [/hip thrust|glute|kickback|bridge/,"Glutes",["Hamstrings"]],
-    [/squat|leg press|lunge|step.?up|leg extension/,"Quads",["Glutes"]],
-    [/romanian|rdl|hamstring|leg curl|good morning/,"Hamstrings",["Glutes","Back"]]
+    [/squat|leg press|lunge|step.?up|leg extension/,"Quadriceps",["Glutes"]],
+    [/romanian|rdl|hamstring|leg curl|deadlift/,"Hamstrings",["Glutes","Lower Back"]],
+    [/calf|toe raise|jump rope|box jump/,"Calves",["Quadriceps"]]
   ];
   const match=rules.find(([pattern])=>pattern.test(n));
   return match?{primary:match[1],secondary:match[2]}:{primary:fallback,secondary:[]};
@@ -64,7 +73,7 @@ function inferMuscles(name:string, fallback:string) {
 
 function ExerciseMuscleMap({ name, muscle }: { name:string; muscle:string }) {
   const detected=inferMuscles(name,muscle); const all=[detected.primary,...detected.secondary];
-  return <div className="exercise-map"><div className="anatomy-image">{all.flatMap((m,mi)=>(MUSCLE_POINTS[m]||[]).map((p,i)=><i className={`${mi===0?"primary":"secondary"} ${m.toLowerCase()}`} style={{left:`${p.x}%`,top:`${p.y}%`}} key={`${m}-${i}`}/>))}</div><div><span>AI MUSCLE MATCH</span><b>{detected.primary}</b>{detected.secondary.length>0&&<small>Supports: {detected.secondary.join(" + ")}</small>}</div></div>;
+  return <div className="exercise-map"><div className="anatomy-image">{all.flatMap((m,mi)=>(MUSCLE_POINTS[m]||[]).map((p,i)=><i className={`${mi===0?"primary":"secondary"} ${m.toLowerCase().replaceAll(" ","-")}`} style={{left:`${p.x}%`,top:`${p.y}%`}} key={`${m}-${i}`}/>))}</div><div><span>AI MUSCLE MATCH</span><b>{detected.primary}</b><small>{MUSCLE_INFO[detected.primary]}</small>{detected.secondary.length>0&&<small>Supports: {detected.secondary.join(" + ")}</small>}</div></div>;
 }
 
 export default function Home() {
@@ -72,7 +81,7 @@ export default function Home() {
   const [tab, setTab] = useState<Tab>("today");
   const [name, setName] = useState("Alex");
   const [days, setDays] = useState(4);
-  const [targets, setTargets] = useState<string[]>(["Chest", "Back", "Quads"]);
+  const [targets, setTargets] = useState<string[]>(["Chest", "Mid-Back", "Quadriceps"]);
   const [exercises, setExercises] = useState<Exercise[]>(seed);
   const [volume, setVolume] = useState(28);
   const [muted, setMuted] = useState(true);
@@ -83,7 +92,7 @@ export default function Home() {
   const player = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => { if (screen === "intro") { const t = setTimeout(() => {}, 10); return () => clearTimeout(t); } }, [screen]);
-  useEffect(() => { try { const saved = localStorage.getItem("vm-state"); if (saved) { const p = JSON.parse(saved); if (p.exercises) setExercises(p.exercises); if (p.journal) setJournal(p.journal); } } catch {} }, []);
+  useEffect(() => { try { const saved = localStorage.getItem("vm-state"); if (saved) { const p = JSON.parse(saved); if (p.exercises) setExercises(p.exercises.map((e:Exercise)=>({...e,muscle:e.muscle==="Back"?"Mid-Back":e.muscle==="Quads"?"Quadriceps":e.muscle==="Arms"?inferMuscles(e.name,"Biceps").primary:e.muscle}))); if (p.journal) setJournal(p.journal); } } catch {} }, []);
   useEffect(() => { try { localStorage.setItem("vm-state", JSON.stringify({ exercises, journal })); } catch {} }, [exercises, journal]);
   const trained = useMemo(() => Array.from(new Set(exercises.filter(e => e.done).map(e => e.muscle))), [exercises]);
   const momentum = Math.round((exercises.filter(e => e.done).length / Math.max(exercises.length, 1)) * 100);
