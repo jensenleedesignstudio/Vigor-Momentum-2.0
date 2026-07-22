@@ -97,7 +97,7 @@ export default function Home() {
     {screen === "account" && <section className="account-screen slide-in">
       <header><Mark /><span className="micro">01 — START</span></header>
       <div className="account-grid">
-        <div><p className="eyebrow">YOUR TRAINING, COMPOUNDED.</p><h1>Build strength.<br />Keep <em>momentum.</em></h1><p className="lede">A focused place for your routines, sessions, and every small win between them.</p></div>
+        <div><p className="eyebrow">YOUR TRAINING, COMPOUNDED.</p><h1 className="letter-headline"><TypeText text="Build strength." delay={0.2} /><br /><TypeText text="Keep " delay={1.75} /><em><TypeText text="momentum." delay={2.25} /></em></h1><p className="lede">A focused place for your routines, sessions, and every small win between them.</p></div>
         <form className="account-card" onSubmit={e => { e.preventDefault(); setScreen("intro"); }}>
           <span className="step">EXAMPLE ACCOUNT</span><h2>Good to meet you.</h2>
           <label>Your name<input value={name} onChange={e => setName(e.target.value)} required /></label>
@@ -128,7 +128,7 @@ export default function Home() {
 
     {screen === "plan" && <section className="plan-screen slide-in">
       <TopBar step="03 — YOUR RHYTHM" />
-      <div className="plan-copy"><p className="eyebrow">ALMOST THERE</p><h1 className="slide-typewriter">Make room<br />for <em>progress.</em></h1><p>Choose the rhythm and focus. We’ll give you a practical starting routine.</p></div>
+      <div className="plan-copy"><p className="eyebrow">ALMOST THERE</p><h1 className="letter-headline"><TypeText text="Make room" delay={0.35} /><br /><TypeText text="for " delay={1.35} /><em><TypeText text="progress." delay={1.8} /></em></h1><p>Choose the rhythm and focus. We’ll give you a practical starting routine.</p></div>
       <div className="plan-panel">
         <label className="section-label">Days available each week</label><div className="day-row">{[2,3,4,5,6].map(d => <button key={d} className={days === d ? "selected" : ""} onClick={() => setDays(d)}>{d}<small>{d === 2 ? "LIGHT" : d === 6 ? "FOCUSED" : "DAYS"}</small></button>)}</div>
         <label className="section-label">Muscle groups to prioritize</label><div className="chips">{MUSCLES.map(m => <button key={m} className={targets.includes(m) ? "selected" : ""} onClick={() => setTargets(x => x.includes(m) ? x.filter(y => y !== m) : [...x, m])}><span>{targets.includes(m) ? "●" : "○"}</span>{m}</button>)}</div>
