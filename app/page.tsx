@@ -39,22 +39,11 @@ function TypeText({ text, delay = 0, className = "" }: { text: string; delay?: n
 }
 
 function BodyMap({ active = ["Chest", "Back", "Quads"] }: { active?: string[] }) {
-  const on = (m: string) => active.includes(m) ? "hot" : "";
-  return <div className="body-wrap" aria-label={`Muscles trained: ${active.join(", ")}`}>
-    <div className="body-label front-label">FRONT</div><div className="body-label back-label">BACK</div>
-    <div className="figure front">
-      <i className={`head ${on("Shoulders")}`} /><i className={`torso ${on("Chest")}`} /><i className={`core ${on("Core")}`} />
-      <i className={`arm l ${on("Arms")}`} /><i className={`arm r ${on("Arms")}`} /><i className={`leg l ${on("Quads")}`} /><i className={`leg r ${on("Quads")}`} />
-    </div>
-    <div className="figure back">
-      <i className="head" /><i className={`torso ${on("Back")}`} /><i className={`core ${on("Glutes")}`} />
-      <i className={`arm l ${on("Arms")}`} /><i className={`arm r ${on("Arms")}`} /><i className={`leg l ${on("Hamstrings")}`} /><i className={`leg r ${on("Hamstrings")}`} />
-    </div>
-  </div>;
+  return <div className="body-wrap clinical-body" aria-label={`Muscles trained: ${active.join(", ")}`}><div className="clinical-anatomy">{active.flatMap((m,mi)=>(MUSCLE_POINTS[m]||[]).map((p,i)=><i className={`${mi===0?"primary ":""}${m.toLowerCase()}`} style={{left:`${p.x}%`,top:`${p.y}%`}} key={`${m}-${i}`}/>))}</div><div className="clinical-legend"><span>FRONT</span><b>{active.length ? active.join(" · ") : "No training logged"}</b><span>BACK</span></div></div>;
 }
 
 const MUSCLE_POINTS: Record<string, {x:number;y:number}[]> = {
-  Chest:[{x:31,y:29}], Back:[{x:69,y:34}], Shoulders:[{x:25,y:26},{x:37,y:26},{x:63,y:26},{x:76,y:26}], Arms:[{x:22,y:37},{x:40,y:37},{x:60,y:38},{x:78,y:38}], Core:[{x:31,y:41}], Glutes:[{x:69,y:55}], Quads:[{x:27,y:62},{x:35,y:62}], Hamstrings:[{x:66,y:65},{x:72,y:65}]
+  Chest:[{x:28,y:25}], Back:[{x:72,y:31}], Shoulders:[{x:22,y:23},{x:34,y:23},{x:66,y:23},{x:78,y:23}], Arms:[{x:19,y:34},{x:37,y:34},{x:63,y:34},{x:81,y:34}], Core:[{x:28,y:37}], Glutes:[{x:72,y:51}], Quads:[{x:25,y:59},{x:31,y:59}], Hamstrings:[{x:69,y:61},{x:75,y:61}]
 };
 
 function inferMuscles(name:string, fallback:string) {
@@ -75,7 +64,7 @@ function inferMuscles(name:string, fallback:string) {
 
 function ExerciseMuscleMap({ name, muscle }: { name:string; muscle:string }) {
   const detected=inferMuscles(name,muscle); const all=[detected.primary,...detected.secondary];
-  return <div className="exercise-map"><div className="anatomy-image">{all.flatMap((m,mi)=>(MUSCLE_POINTS[m]||[]).map((p,i)=><i className={mi===0?"primary":"secondary"} style={{left:`${p.x}%`,top:`${p.y}%`}} key={`${m}-${i}`}/>))}</div><div><span>AI MUSCLE MATCH</span><b>{detected.primary}</b>{detected.secondary.length>0&&<small>Supports: {detected.secondary.join(" + ")}</small>}</div></div>;
+  return <div className="exercise-map"><div className="anatomy-image">{all.flatMap((m,mi)=>(MUSCLE_POINTS[m]||[]).map((p,i)=><i className={`${mi===0?"primary":"secondary"} ${m.toLowerCase()}`} style={{left:`${p.x}%`,top:`${p.y}%`}} key={`${m}-${i}`}/>))}</div><div><span>AI MUSCLE MATCH</span><b>{detected.primary}</b>{detected.secondary.length>0&&<small>Supports: {detected.secondary.join(" + ")}</small>}</div></div>;
 }
 
 export default function Home() {
