@@ -152,7 +152,7 @@ function BodyMap({ active = ["Chest", "Mid-Back", "Quadriceps"] }: { active?: st
 }
 
 const MUSCLE_POINTS: Record<string, {x:number;y:number}[]> = {
-  Chest:[{x:28,y:25}], "Upper Back":[{x:72,y:23}], "Mid-Back":[{x:72,y:32}], "Lower Back":[{x:72,y:42}], Shoulders:[{x:22,y:23},{x:34,y:23},{x:66,y:23},{x:78,y:23}], Biceps:[{x:20,y:32},{x:36,y:32}], Triceps:[{x:64,y:32},{x:80,y:32}], Core:[{x:28,y:37}], Glutes:[{x:72,y:51}], Quadriceps:[{x:25,y:59},{x:31,y:59}], Hamstrings:[{x:69,y:61},{x:75,y:61}], Calves:[{x:69,y:76},{x:75,y:76}], Back:[{x:72,y:31}], Quads:[{x:25,y:59},{x:31,y:59}], Arms:[{x:20,y:32},{x:36,y:32}]
+  Chest:[{x:27.3,y:24}], "Upper Back":[{x:71.8,y:22}], "Mid-Back":[{x:71.8,y:33.5}], "Lower Back":[{x:71.8,y:41.5}], Shoulders:[{x:20.3,y:22},{x:34.2,y:22},{x:65,y:22},{x:79,y:22}], Biceps:[{x:18.8,y:31},{x:35.8,y:31}], Triceps:[{x:63.5,y:31},{x:80.4,y:31}], Core:[{x:27.3,y:35.5}], Glutes:[{x:71.8,y:49.5}], Quadriceps:[{x:24.4,y:57},{x:30.2,y:57}], Hamstrings:[{x:68.8,y:59.5},{x:74.8,y:59.5}], Calves:[{x:68.5,y:74.5},{x:75,y:74.5}], Back:[{x:71.8,y:32}], Quads:[{x:24.4,y:57},{x:30.2,y:57}], Arms:[{x:18.8,y:31},{x:35.8,y:31}]
 };
 
 function inferMuscles(name:string, fallback:string) {
@@ -313,7 +313,7 @@ function Today({ exercises, update, momentum, trained, setTab }: { exercises: Ex
     <section className="session-card"><div className="card-head"><div><span className="eyebrow">TODAY / FULL BODY</span><h3>Strength foundation</h3></div><button onClick={()=>setTab("routine")}>Edit routine ↗</button></div>
       <div className="exercise-list">{exercises.map((e,i)=><button key={e.id} onClick={()=>update(e.id,{done:!e.done})} className={e.done?"done":""}><span className="check">{e.done?"✓":""}</span><b>{String(i+1).padStart(2,"0")}</b><strong>{e.name}<small>{e.muscle}</small></strong><span>{e.sets} SETS</span><span>{e.reps} REPS</span><i>↗</i></button>)}</div>
     </section>
-    <section className="body-card"><div><span className="eyebrow">THIS WEEK / BODY MAP</span><h3>Work, mapped.</h3><p>Trained muscles illuminate as you log your sessions.</p><div className="legend"><i/> TRAINED <i/> RECOVERING</div></div><BodyMap active={trained}/></section>
+    <section className="body-card"><div><span className="eyebrow">TODAY / BODY MAP</span><h3>Today, mapped.</h3><p>Muscles illuminate as you complete today’s exercises.</p><div className="legend"><i/> TRAINED TODAY <i/> NOT YET TRAINED</div></div><BodyMap active={trained}/></section>
     <section className="quote-card"><span>“</span><p>We are what we repeatedly do. Excellence, then, is not an act, but a habit.</p><small>— ARISTOTLE</small></section>
   </div>;
 }
