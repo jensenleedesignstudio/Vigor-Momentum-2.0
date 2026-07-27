@@ -25,5 +25,4 @@ npm run start
 ## Notes
 
 - This project now runs as a standard client-side React app.
-- Unused hosted-runtime configuration has been removed from this local version.
 - The main UI lives in the existing React component tree under `app/page.tsx` and is mounted via `src/main.tsx`.
