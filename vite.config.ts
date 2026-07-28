@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react";
 // Vite handles local development, React/TSX compilation, and production bundling.
 export default defineConfig({
   // The React plugin provides JSX transformation and fast refresh while editing.
+  base: "/Vigor-Momentum-2.0/",
   plugins: [react()],
   // Development server used by `npm run dev`.
   server: {
