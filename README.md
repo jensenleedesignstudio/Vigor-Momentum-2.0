@@ -1,8 +1,7 @@
 # Vigor Momentum
 
 A local-first strength-training app: plan a week, run the session, log what
-happened, and get coaching feedback derived from your own data. Everything is
-stored in the browser — there is no account and no server.
+happened, and get coaching feedback derived from your own data. 
 
 ## Prerequisites
 
@@ -15,15 +14,6 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
-## Other scripts
-
-```bash
-npm run build      # production bundle into dist/
-npm run start      # preview the production build on :4173
-npm run typecheck  # tsc --noEmit
-npm run test       # typecheck + build
-npm run lint       # eslint
-```
 
 ## Project layout
 
@@ -66,7 +56,7 @@ felt easy earns load, a maximal set earns a deload prompt.
 
 ## Notes
 
-- Data lives under the `vm-*` keys in `localStorage`. Settings → Your data
+- Data lives under the `vm-*` keys in `localStorage`. Under settings you can access "Your data"
   exports and restores a full JSON backup.
 - Appearance follows the OS by default; light and dark can be pinned in
   settings, alongside a reduce-motion switch.
