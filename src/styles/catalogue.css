@@ -1,0 +1,384 @@
+/* Exercise catalogue and Snack Bar. */
+
+.catalogue-page {
+  padding: 26px 0;
+}
+
+.section-switch {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.section-switch button {
+  padding: 12px 18px;
+  font: 700 9px var(--font-mono);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.section-switch button span {
+  margin-left: 8px;
+  padding: 3px 6px;
+  background: var(--surface-3);
+  border-radius: 2px;
+}
+
+.section-switch button.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.section-switch button.active span {
+  background: var(--brand-soft);
+  color: var(--on-brand);
+}
+
+.catalogue-hero {
+  background: var(--brand-soft);
+  color: var(--on-brand);
+  border-radius: var(--radius-lg);
+  padding: 30px clamp(18px, 3vw, 44px);
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 40px;
+  align-items: end;
+}
+
+.catalogue-hero .eyebrow {
+  color: color-mix(in srgb, var(--on-brand) 72%, transparent);
+}
+
+.catalogue-hero h1 {
+  font-size: clamp(46px, 6.4vw, 96px);
+  line-height: 0.84;
+  letter-spacing: -0.075em;
+  margin: 16px 0;
+}
+
+.catalogue-hero p {
+  max-width: 56ch;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.food-hero {
+  background: linear-gradient(120deg, var(--brand-wash), var(--surface-2));
+  color: var(--ink);
+}
+
+.catalogue-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.catalogue-controls label {
+  font: 700 7px var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.catalogue-control-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.catalogue-controls select,
+.catalogue-controls input[type="date"],
+.catalogue-controls input[type="number"],
+.catalogue-search {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 12px;
+  font-size: 12px;
+}
+
+.catalogue-controls select,
+.catalogue-controls input[type="date"],
+.catalogue-controls input[type="number"] {
+  display: block;
+  margin-top: 6px;
+}
+
+.catalogue-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+}
+
+.catalogue-search > span {
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.catalogue-search input {
+  border: 0;
+  outline: 0;
+  width: 100%;
+  background: transparent;
+  font-size: 12.5px;
+}
+
+.catalogue-categories {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding: 16px 0;
+}
+
+.catalogue-categories button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  white-space: nowrap;
+  padding: 9px 12px;
+  font: 700 8px var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.catalogue-categories button span {
+  margin-left: 8px;
+  color: var(--faint);
+}
+
+.catalogue-categories button.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.catalogue-categories button.active span {
+  color: var(--brand-soft);
+}
+
+.catalogue-result-head {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding: 8px 2px;
+  font: 700 7px var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.catalogue-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.catalogue-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 46px 148px minmax(150px, 1fr) 118px;
+  grid-template-rows: auto auto;
+  gap: 12px;
+  align-items: center;
+  transition: border-color 0.16s ease;
+}
+
+.catalogue-card:hover {
+  border-color: var(--brand);
+}
+
+.catalogue-number {
+  align-self: start;
+  font: 800 16px var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.catalogue-number span {
+  display: block;
+  font-size: 6px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+
+.catalogue-thumb {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 8px;
+  grid-row: 1 / 3;
+  grid-column: 2;
+  width: 148px;
+}
+
+.catalogue-info {
+  min-width: 0;
+}
+
+.catalogue-info h3 {
+  font-size: 14.5px;
+  margin: 0 0 10px;
+  font-weight: 600;
+}
+
+.catalogue-info dl {
+  display: flex;
+  gap: 18px;
+  margin: 0;
+}
+
+.catalogue-info dt {
+  font: 700 6px var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.catalogue-info dd {
+  font-size: 9.5px;
+  margin: 4px 0 0;
+  line-height: 1.4;
+}
+
+.catalogue-prescription {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.catalogue-prescription strong {
+  font-size: 21px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.catalogue-prescription strong small {
+  display: block;
+  font: 700 6px var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.catalogue-prescription > b {
+  font-weight: 400;
+  color: var(--faint);
+}
+
+.catalogue-card > button {
+  grid-column: 3 / 5;
+  background: var(--brand-wash);
+  color: var(--brand-ink);
+  padding: 10px;
+  font: 700 8px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.catalogue-card > button:hover {
+  background: var(--brand);
+  color: var(--on-brand);
+}
+
+/* ── Food cards ────────────────────────────────────────────────────────── */
+
+.food-card {
+  grid-template-columns: 46px 96px minmax(210px, 1fr) 150px;
+}
+
+.food-monogram {
+  grid-row: 1 / 3;
+  width: 92px;
+  height: 92px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background-repeat: no-repeat;
+  background-color: var(--surface-3);
+}
+
+.food-monogram.snack-photo {
+  background-image: url("/snack-food-sprite.png");
+  background-size: 500% 300%;
+}
+
+.food-monogram.meal-photo {
+  background-image: url("/meal-food-sprite.png");
+  background-size: 500% 400%;
+}
+
+.home-snack-photo.snack-photo {
+  background-image: url("/snack-food-sprite.png");
+  background-size: 500% 300%;
+}
+
+.home-snack-photo.meal-photo {
+  background-image: url("/meal-food-sprite.png");
+  background-size: 500% 400%;
+}
+
+.food-card .catalogue-info p {
+  margin: 10px 0 0;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  font-size: 8.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.food-card .catalogue-info dl {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+}
+
+.food-macros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  align-items: end;
+}
+
+.food-macros > strong {
+  grid-column: 1 / -1;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.food-macros > strong small {
+  display: block;
+  font: 700 6px var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.food-macros span {
+  font: 700 6px var(--font-mono);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.food-macros span b {
+  display: block;
+  font-size: 11px;
+  color: var(--ink);
+}
+
+/* Macro letters inherit the same validated series hues as the meters. */
+.food-macros span:nth-of-type(1) b {
+  color: var(--viz-series-1);
+}
+
+.food-macros span:nth-of-type(2) b {
+  color: var(--viz-series-2);
+}
+
+.food-macros span:nth-of-type(3) b {
+  color: var(--viz-series-3);
+}

@@ -1,0 +1,172 @@
+/*
+  Design tokens.
+
+  Everything downstream is written against these roles, never raw hex, so the
+  dark theme is a value swap rather than a second stylesheet. The `--viz-*`
+  slots were validated for colour-vision separation and surface contrast in both
+  modes before being adopted.
+
+  Note on fonts: earlier builds referenced `--font-geist` and `--font-mono`
+  without ever defining them, which made every `font:` shorthand that used them
+  invalid at computed-value time — the mono eyebrow type silently fell back to
+  inherited styling. They are defined here.
+*/
+
+:root {
+  color-scheme: light;
+
+  /* Type */
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-geist: var(--font-sans);
+
+  /* Neutrals */
+  --paper: #ece9e1;
+  --surface: #ffffff;
+  --surface-2: #f6f6f1;
+  --surface-3: #eeece5;
+  --ink: #111310;
+  --ink-2: #3d423b;
+  --muted: #666a63;
+  --faint: #82877e;
+  --line: #d4d6d0;
+  --line-strong: #b9bdb6;
+
+  /* Brand */
+  --brand: #78966c;
+  --brand-strong: #4a7d33;
+  --brand-soft: #a8c493;
+  --brand-wash: #e7eee3;
+  --brand-ink: #2f4a28;
+  --on-brand: #111310;
+
+  /* Sidebar / inverted surfaces */
+  --shell: #111310;
+  --shell-2: #1c201b;
+  --shell-line: #333a31;
+  --shell-ink: #f4f5f1;
+  --shell-muted: #9aa197;
+
+  /* Status — reserved, never reused as a series colour */
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-serious: #ec835a;
+  --status-critical: #d03b3b;
+
+  /* Data visualisation */
+  --viz-surface: var(--surface);
+  --viz-accent: #4a7d33;
+  --viz-accent-soft: #cfe0c2;
+  --viz-grid: #e4e5e0;
+  --viz-axis: #c2c5bd;
+  --viz-series-1: #2a78d6;
+  --viz-series-2: #eb6834;
+  --viz-series-3: #1baf7a;
+
+  /* Muscle heat ramp — one hue, light to dark */
+  --heat-1: #a8c99a;
+  --heat-2: #7fae6b;
+  --heat-3: #558f45;
+  --heat-4: #2f6a2c;
+
+  /* Geometry */
+  --radius: 3px;
+  --radius-lg: 6px;
+  --focus: #2f6a2c;
+  --shadow-1: 0 1px 2px rgb(17 19 16 / 6%);
+  --shadow-2: 0 10px 34px rgb(17 19 16 / 12%);
+  --shadow-3: 0 22px 60px rgb(17 19 16 / 24%);
+  --backdrop: rgb(17 19 16 / 62%);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper: #14170f;
+  --surface: #1b1f19;
+  --surface-2: #232821;
+  --surface-3: #2a3027;
+  --ink: #f2f4ee;
+  --ink-2: #d3d8cd;
+  --muted: #a4ab9d;
+  --faint: #8c9386;
+  --line: #343a30;
+  --line-strong: #4a5245;
+
+  --brand: #8db47a;
+  --brand-strong: #9cc487;
+  --brand-soft: #4f6b41;
+  --brand-wash: #26301f;
+  --brand-ink: #cfe3c1;
+  --on-brand: #10140d;
+
+  --shell: #0e110c;
+  --shell-2: #171b14;
+  --shell-line: #2d342a;
+  --shell-ink: #eef1e9;
+  --shell-muted: #98a091;
+
+  --viz-surface: var(--surface);
+  --viz-accent: #6f9d54;
+  --viz-accent-soft: #38472f;
+  --viz-grid: #2b3128;
+  --viz-axis: #414a3c;
+  --viz-series-1: #3987e5;
+  --viz-series-2: #d95926;
+  --viz-series-3: #199e70;
+
+  --heat-1: #3c5a33;
+  --heat-2: #4f7a41;
+  --heat-3: #6b9c55;
+  --heat-4: #8fbd74;
+
+  --focus: #9cc487;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-2: 0 10px 34px rgb(0 0 0 / 45%);
+  --shadow-3: 0 22px 60px rgb(0 0 0 / 60%);
+  --backdrop: rgb(6 8 5 / 72%);
+}
+
+/*
+  Dark values also respond to the OS setting when the user has not made an
+  explicit choice. The `:not([data-theme])` guard keeps a manual light stamp
+  winning over OS dark.
+*/
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+    --paper: #14170f;
+    --surface: #1b1f19;
+    --surface-2: #232821;
+    --surface-3: #2a3027;
+    --ink: #f2f4ee;
+    --ink-2: #d3d8cd;
+    --muted: #a4ab9d;
+    --faint: #8c9386;
+    --line: #343a30;
+    --line-strong: #4a5245;
+    --brand: #8db47a;
+    --brand-strong: #9cc487;
+    --brand-soft: #4f6b41;
+    --brand-wash: #26301f;
+    --brand-ink: #cfe3c1;
+    --on-brand: #10140d;
+    --shell: #0e110c;
+    --shell-2: #171b14;
+    --shell-line: #2d342a;
+    --viz-accent: #6f9d54;
+    --viz-accent-soft: #38472f;
+    --viz-grid: #2b3128;
+    --viz-axis: #414a3c;
+    --viz-series-1: #3987e5;
+    --viz-series-2: #d95926;
+    --viz-series-3: #199e70;
+    --heat-1: #3c5a33;
+    --heat-2: #4f7a41;
+    --heat-3: #6b9c55;
+    --heat-4: #8fbd74;
+    --focus: #9cc487;
+    --backdrop: rgb(6 8 5 / 72%);
+  }
+}

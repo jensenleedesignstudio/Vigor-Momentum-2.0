@@ -1,0 +1,269 @@
+/* The four screens before the app shell: account, brand moment, profile, plan. */
+
+.account-screen {
+  min-height: 100vh;
+  padding: 28px 4vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.account-screen header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.account-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  align-items: center;
+  gap: 8vw;
+  max-width: 1300px;
+  margin: auto;
+  width: 100%;
+}
+
+.lede,
+.onboard-copy > p:last-child,
+.plan-copy > p:last-child {
+  max-width: 44ch;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.account-card {
+  border-top: 1px solid var(--ink);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.account-card h2 {
+  font-size: 30px;
+  letter-spacing: -0.045em;
+  margin: 4px 0 8px;
+  font-weight: 600;
+}
+
+.account-card label,
+.form-panel label {
+  font: 600 10px var(--font-mono);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.account-card input,
+.form-panel input,
+.form-panel select {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+  padding: 14px;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+.account-card input:focus,
+.form-panel input:focus,
+.form-panel select:focus {
+  border-color: var(--ink);
+}
+
+.account-card small {
+  color: var(--muted);
+  text-align: center;
+  font-size: 11px;
+}
+
+/* ── Intro ─────────────────────────────────────────────────────────────── */
+
+.intro-screen {
+  height: 100vh;
+  background: var(--shell);
+  color: var(--shell-ink);
+  padding: 26px 3vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.intro-top,
+.intro-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: 600 9px var(--font-mono);
+  letter-spacing: 0.14em;
+  color: var(--shell-muted);
+}
+
+.intro-center {
+  margin: auto;
+  text-align: center;
+}
+
+.intro-center h1 {
+  font-size: clamp(48px, 9.4vw, 148px);
+  line-height: 1;
+  margin: 18px 0;
+  letter-spacing: -0.075em;
+  font-weight: 700;
+  white-space: nowrap;
+  min-height: 1em;
+}
+
+.intro-center > p:not(.eyebrow) {
+  font-family: var(--font-serif);
+  font-size: clamp(16px, 1.7vw, 24px);
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--shell-muted);
+}
+
+.intro-center .primary {
+  margin: 32px auto 0;
+  width: 220px;
+}
+
+/* ── Profile & plan ────────────────────────────────────────────────────── */
+
+.onboard,
+.plan-screen {
+  min-height: 100vh;
+  padding: 28px 4vw;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template: 80px 1fr / 1fr 450px;
+  gap: 5vw;
+  overflow: hidden;
+}
+
+.topbar {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  position: relative;
+  z-index: 3;
+  font: 600 10px var(--font-mono);
+  letter-spacing: 0.11em;
+  color: var(--muted);
+}
+
+.topbar > span:nth-child(2) {
+  text-align: center;
+}
+
+.topbar > span:last-child {
+  text-align: right;
+}
+
+.onboard-copy,
+.plan-copy {
+  align-self: center;
+  position: relative;
+  z-index: 2;
+}
+
+.form-panel,
+.plan-panel {
+  align-self: center;
+  border-top: 1px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 20px;
+  z-index: 2;
+}
+
+.plan-panel {
+  gap: 20px;
+}
+
+.measure > div {
+  display: grid;
+  grid-template-columns: 1fr 90px;
+}
+
+.measure select {
+  border-left: 0;
+}
+
+.measure > label {
+  font: 600 10px var(--font-mono);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.big-index {
+  position: absolute;
+  left: -1vw;
+  bottom: -10vw;
+  font-size: 34vw;
+  font-weight: 700;
+  letter-spacing: -0.1em;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--line-strong);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.66;
+}
+
+.day-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+}
+
+.day-row button {
+  height: 74px;
+  border: 1px solid var(--line-strong);
+  font-size: 22px;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.day-row small {
+  display: block;
+  font: 600 7px var(--font-mono);
+  letter-spacing: 0.08em;
+  margin-top: 6px;
+}
+
+.day-row button.selected,
+.chips button.selected {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.chips button {
+  text-align: left;
+  border: 1px solid var(--line-strong);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.chips button span {
+  margin-right: 9px;
+  color: var(--brand-strong);
+}
+
+.chips button.selected span {
+  color: var(--brand-soft);
+}

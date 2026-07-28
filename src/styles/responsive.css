@@ -1,0 +1,469 @@
+/* Breakpoints, in one place, so layout collapses are easy to reason about. */
+
+@media (max-width: 1200px) {
+  .catalogue-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .history-card {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 1050px) {
+  .bulk-toolbar {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .bulk-toolbar .bulk-delete {
+    grid-column: 3;
+  }
+
+  .routine-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    grid-template-columns: 68px minmax(0, 1fr);
+  }
+
+  .app-shell > aside {
+    padding: 22px 10px;
+  }
+
+  .app-shell aside .mark {
+    font-size: 14px;
+  }
+
+  .app-shell aside nav button {
+    justify-content: center;
+    padding: 12px 6px;
+  }
+
+  .app-shell aside nav button .sidebar-type,
+  .app-shell aside nav button kbd,
+  .sidebar-tip,
+  .profile b,
+  .profile i {
+    display: none;
+  }
+
+  .app-shell aside nav button > span:first-child {
+    font-size: 17px;
+  }
+
+  .profile {
+    justify-content: center;
+    margin-top: auto;
+  }
+
+  .profile > span {
+    margin: 0;
+  }
+
+  .workspace::before {
+    left: 68px;
+  }
+
+  .settings-backdrop {
+    padding-left: 68px;
+  }
+
+  .dashboard,
+  .progress-grid,
+  .journal-grid,
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-grid {
+    gap: 34px;
+    padding: 60px 0;
+  }
+
+  .session-card {
+    grid-row: auto;
+  }
+
+  .streak-card {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .streak-card > div {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 0 0 16px;
+  }
+
+  .streak-card > div:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .onboard,
+  .plan-screen {
+    grid-template: 70px auto auto / 1fr;
+  }
+
+  .form-panel,
+  .plan-panel {
+    width: 100%;
+    max-width: 550px;
+  }
+
+  .big-index {
+    display: none;
+  }
+
+  .calendar-page {
+    grid-template-columns: 1fr;
+  }
+
+  .day-detail {
+    position: static;
+  }
+
+  .calendar-grid > button,
+  .calendar-empty {
+    min-height: 88px;
+  }
+
+  .catalogue-hero,
+  .macro-head,
+  .home-snack-bar > header {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .macro-date,
+  .home-snack-total {
+    text-align: left;
+  }
+
+  .macro-targets,
+  .macro-summary,
+  .home-snack-grid,
+  .macro-chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .weekly-report-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .weekly-report-stats > div {
+    padding: 16px;
+  }
+
+  .weekly-report-stats > div:nth-child(2) {
+    border-right: 0;
+  }
+
+  .weekly-feedback {
+    grid-template-columns: 1fr;
+  }
+
+  .balance-list li {
+    grid-template-columns: 96px minmax(60px, 1fr) 64px;
+  }
+
+  .balance-status {
+    grid-column: 2 / -1;
+    text-align: left;
+  }
+
+  .catalogue-card {
+    grid-template-columns: 42px 118px minmax(0, 1fr);
+  }
+
+  .catalogue-thumb {
+    width: 118px;
+  }
+
+  .catalogue-prescription {
+    grid-column: 3;
+    justify-content: flex-start;
+  }
+
+  .catalogue-card > button {
+    grid-column: 2 / 4;
+  }
+
+  .catalogue-info dl {
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .food-card {
+    grid-template-columns: 42px 92px minmax(0, 1fr);
+  }
+
+  .food-macros {
+    grid-column: 3;
+  }
+
+  .body-progress {
+    grid-template-columns: 1fr;
+  }
+
+  .runner-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .weight-form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    display: block;
+  }
+
+  .app-shell > aside {
+    position: fixed;
+    inset: auto 0 0 0;
+    top: auto;
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+    overflow-y: auto;
+    flex-direction: column;
+    padding: 14px 14px 20px;
+    border-top: 1px solid var(--shell-line);
+    transform: translateY(100%);
+    transition: transform 0.24s cubic-bezier(0.22, 0.9, 0.25, 1);
+  }
+
+  .app-shell > aside.open {
+    transform: translateY(0);
+  }
+
+  .app-shell > aside > .mark-button,
+  .app-shell > aside > .mark {
+    display: none;
+  }
+
+  .app-shell aside nav {
+    margin-top: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .app-shell aside nav button {
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 6px;
+    text-align: center;
+  }
+
+  .app-shell aside nav button .sidebar-type {
+    display: inline;
+    font-size: 10px;
+  }
+
+  .app-shell aside nav button kbd {
+    display: none;
+  }
+
+  .sidebar-tip {
+    display: none;
+  }
+
+  .profile {
+    display: flex;
+    margin-top: 14px;
+  }
+
+  .profile b,
+  .profile i {
+    display: block;
+  }
+
+  .mobile-nav-toggle {
+    display: grid;
+    place-items: center;
+  }
+
+  .workspace {
+    padding: 0 16px 96px;
+  }
+
+  .workspace::before {
+    left: 0;
+  }
+
+  .settings-backdrop {
+    padding: 0;
+  }
+
+  .settings-panel {
+    width: 100%;
+    padding: 22px;
+  }
+
+  .app-header {
+    min-height: 84px;
+  }
+
+  .header-search {
+    min-width: 44px;
+    padding: 0 10px;
+  }
+
+  .header-search b,
+  .header-search kbd,
+  .header-actions > span {
+    display: none;
+  }
+
+  .music-pop {
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+
+  .board-builder {
+    margin: 0 -16px -96px;
+    padding: 24px 12px 40px;
+  }
+
+  .bulk-toolbar {
+    position: static;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .bulk-toolbar > div,
+  .bulk-toolbar > button.bulk-delete {
+    grid-column: 1 / -1;
+  }
+
+  .routine-filters,
+  .stat-entry-form,
+  .weight-form,
+  .settings-data-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-grid,
+  .macro-targets,
+  .macro-summary,
+  .macro-chips,
+  .home-snack-grid,
+  .weekly-report-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .weekly-report-stats > div {
+    border-right: 0;
+    border-bottom: 1px solid var(--shell-line);
+  }
+
+  .balance-list li {
+    grid-template-columns: 1fr auto;
+    row-gap: 6px;
+  }
+
+  .balance-list .meter {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+
+  .balance-status {
+    order: 4;
+    grid-column: 1 / -1;
+  }
+
+  .catalogue-card,
+  .food-card {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .catalogue-thumb,
+  .food-monogram {
+    grid-column: 1 / 3;
+    grid-row: auto;
+    width: 100%;
+  }
+
+  .food-monogram {
+    height: 140px;
+    background-size: 500% 300%;
+  }
+
+  .catalogue-info,
+  .catalogue-prescription,
+  .food-macros,
+  .catalogue-card > button {
+    grid-column: 1 / 3;
+  }
+
+  .log-head,
+  .log-row,
+  .calendar-log-head,
+  .calendar-log-row {
+    min-width: 620px;
+  }
+
+  .log-card,
+  .stat-tracker {
+    overflow-x: auto;
+  }
+
+  .macro-week {
+    grid-template-columns: repeat(7, 160px);
+  }
+
+  .intro-center h1 {
+    font-size: 12vw;
+  }
+
+  .body-card {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-grid > button,
+  .calendar-empty {
+    min-height: 72px;
+    padding: 6px;
+  }
+
+  .calendar-grid > button > div {
+    margin-top: 6px;
+  }
+
+  .runner {
+    padding: 18px;
+  }
+
+  .runner-foot button {
+    min-width: 100%;
+  }
+
+  .palette-results button {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+
+  .palette-results small {
+    white-space: normal;
+  }
+
+  .day-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .toast-stack {
+    bottom: 82px;
+  }
+}

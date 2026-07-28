@@ -1,0 +1,21 @@
+/*
+  Stylesheet entry point.
+
+  Order matters: tokens define the vocabulary, base sets the reset and shared
+  roles, feature sheets style their own area, and responsive collapses layouts
+  last. Nothing below `tokens.css` should contain a raw colour value.
+*/
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./charts.css";
+@import "./anatomy.css";
+@import "./onboarding.css";
+@import "./shell.css";
+@import "./dashboard.css";
+@import "./report.css";
+@import "./builder.css";
+@import "./catalogue.css";
+@import "./tracker.css";
+@import "./calendar.css";
+@import "./responsive.css";

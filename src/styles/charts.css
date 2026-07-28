@@ -1,0 +1,362 @@
+/*
+  Data-visualisation layer.
+
+  One mark spec across every chart: columns capped at 24px with a 4px rounded
+  data-end, hairline solid gridlines a single step off the surface, and labels
+  only on the peak or the selected point. Text always wears an ink token — never
+  the series colour.
+*/
+
+.viz {
+  margin: 18px 0 0;
+}
+
+.viz-plot {
+  position: relative;
+  width: 100%;
+}
+
+.viz-plot svg {
+  display: block;
+  overflow: visible;
+}
+
+.viz-grid {
+  stroke: var(--viz-grid);
+  stroke-width: 1;
+}
+
+.viz-axis {
+  stroke: var(--viz-axis);
+  stroke-width: 1;
+}
+
+.viz-tick {
+  font: 600 8px var(--font-mono);
+  fill: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.viz-tick.is-active {
+  fill: var(--ink);
+}
+
+.viz-value {
+  font: 700 9px var(--font-mono);
+  fill: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.viz-bar {
+  fill: var(--viz-accent);
+  opacity: 0.82;
+  transition: opacity 0.16s ease, fill 0.16s ease;
+}
+
+.viz-bar.is-active {
+  opacity: 1;
+  fill: var(--brand-strong);
+}
+
+.viz-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.viz-hit:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.viz-tooltip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  gap: 2px;
+  background: var(--shell);
+  color: var(--shell-ink);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  box-shadow: var(--shadow-2);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.viz-tooltip b {
+  font: 700 9px var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+.viz-tooltip span {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.viz-tooltip small {
+  font: 600 8px var(--font-mono);
+  color: var(--shell-muted);
+}
+
+.viz-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 600 10px var(--font-mono);
+  color: var(--faint);
+  text-align: center;
+  padding: 0 20px;
+}
+
+.viz-caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  font: 600 8px var(--font-mono);
+  letter-spacing: 0.05em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.viz-caption button {
+  font: 700 8px var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--brand-strong);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.viz-table {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.viz-table th,
+.viz-table td {
+  text-align: left;
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.viz-table thead th {
+  font: 700 7px var(--font-mono);
+  letter-spacing: 0.08em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.viz-table td {
+  text-align: right;
+}
+
+/* ── Sparkline ─────────────────────────────────────────────────────────── */
+
+.sparkline {
+  width: 100%;
+  min-height: 42px;
+}
+
+.sparkline svg {
+  display: block;
+}
+
+.sparkline-line {
+  fill: none;
+  stroke: var(--viz-accent-soft);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sparkline-dot {
+  fill: var(--viz-accent);
+  stroke: var(--viz-surface);
+  stroke-width: 2;
+}
+
+.sparkline.is-empty {
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.sparkline.is-empty span {
+  font: 600 7px var(--font-mono);
+  color: var(--faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Meter ─────────────────────────────────────────────────────────────── */
+
+.meter {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--viz-accent-soft);
+  overflow: hidden;
+}
+
+.meter i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--viz-accent);
+  transition: width 0.3s ease;
+}
+
+.meter.status-under i {
+  background: var(--status-warning);
+}
+
+.meter.status-over i {
+  background: var(--status-serious);
+}
+
+.meter.status-in-range i,
+.meter.status-good i {
+  background: var(--viz-accent);
+}
+
+.meter.status-none i {
+  background: var(--line-strong);
+}
+
+.meter-threshold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--viz-surface);
+  opacity: 0.9;
+}
+
+/* ── Stat tile ─────────────────────────────────────────────────────────── */
+
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 15px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+button.stat-tile:hover {
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+
+.stat-tile.selected {
+  border-color: var(--brand-strong);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-strong) 22%, transparent);
+  background: var(--brand-wash);
+}
+
+.stat-tile-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-tile-value {
+  font-size: 27px;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  font-variant-numeric: proportional-nums;
+}
+
+.stat-tile-value small {
+  font: 700 8px var(--font-mono);
+  color: var(--muted);
+  margin-left: 5px;
+  letter-spacing: 0.06em;
+}
+
+.stat-tile-foot {
+  font: 600 7px var(--font-mono);
+  letter-spacing: 0.05em;
+  color: var(--faint);
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 700 8px var(--font-mono);
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.delta.is-good {
+  color: var(--brand-strong);
+}
+
+.delta.is-bad {
+  color: var(--status-critical);
+}
+
+.delta small {
+  color: var(--faint);
+  font-weight: 600;
+}
+
+/* ── Progress ring ─────────────────────────────────────────────────────── */
+
+.progress-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.progress-ring svg {
+  position: absolute;
+  inset: 0;
+}
+
+.ring-track {
+  stroke: color-mix(in srgb, var(--on-brand) 16%, transparent);
+}
+
+.ring-fill {
+  stroke: var(--on-brand);
+  transition: stroke-dasharray 0.45s ease;
+}
+
+.ring-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--on-brand);
+}
+
+.ring-label small {
+  font: 600 8px/1.4 var(--font-mono);
+  letter-spacing: 0.05em;
+}

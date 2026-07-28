@@ -1,0 +1,369 @@
+/* Weekly coaching report, score breakdown, and the muscle-volume balance panel. */
+
+.weekly-report {
+  grid-column: 1 / -1;
+  background: var(--shell);
+  color: var(--shell-ink);
+  border: 1px solid var(--shell-line);
+  border-radius: var(--radius-lg);
+  padding: clamp(20px, 3vw, 34px);
+}
+
+.weekly-report > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--shell-line);
+}
+
+.weekly-report .eyebrow {
+  color: var(--shell-muted);
+}
+
+.weekly-report h3 {
+  font-size: clamp(28px, 3.6vw, 48px);
+  letter-spacing: -0.055em;
+  margin: 9px 0;
+  font-weight: 600;
+}
+
+.weekly-report header p {
+  max-width: 62ch;
+  color: var(--shell-muted);
+  font-size: 11.5px;
+  line-height: 1.65;
+}
+
+.weekly-score {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 6px;
+  border-radius: var(--radius);
+}
+
+.weekly-score:hover {
+  background: color-mix(in srgb, var(--shell-ink) 8%, transparent);
+}
+
+.weekly-score strong {
+  font-family: var(--font-sans);
+  font-size: 60px;
+  line-height: 0.8;
+  letter-spacing: -0.07em;
+  font-weight: 600;
+  color: var(--brand-soft);
+  font-variant-numeric: proportional-nums;
+}
+
+.weekly-score span {
+  font: 700 7px/1.45 var(--font-mono);
+  letter-spacing: 0.08em;
+  color: var(--shell-muted);
+  text-align: left;
+}
+
+.score-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--shell-line);
+}
+
+.score-breakdown > div {
+  display: grid;
+  gap: 7px;
+}
+
+.score-breakdown-top {
+  display: flex;
+  justify-content: space-between;
+  font: 700 8px var(--font-mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.score-breakdown-top span {
+  color: var(--brand-soft);
+}
+
+.score-breakdown .meter {
+  background: color-mix(in srgb, var(--shell-ink) 14%, transparent);
+}
+
+.score-breakdown small {
+  font-size: 10px;
+  color: var(--shell-muted);
+  line-height: 1.5;
+}
+
+.weekly-report-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--shell-line);
+}
+
+.weekly-report-stats > div {
+  padding: 20px 16px;
+  border-right: 1px solid var(--shell-line);
+}
+
+.weekly-report-stats > div:first-child {
+  padding-left: 0;
+}
+
+.weekly-report-stats > div:last-child {
+  border-right: 0;
+}
+
+.weekly-report-stats strong {
+  display: block;
+  font-size: 26px;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+
+.weekly-report-stats strong small {
+  font: 700 10px var(--font-mono);
+  color: var(--shell-muted);
+  margin-left: 2px;
+}
+
+.weekly-report-stats span {
+  display: block;
+  margin-top: 6px;
+  font: 700 7px var(--font-mono);
+  letter-spacing: 0.09em;
+  color: var(--shell-muted);
+}
+
+.weekly-feedback {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  padding: 20px 0;
+}
+
+.weekly-feedback article {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--shell-2);
+  border: 1px solid var(--shell-line);
+  border-radius: var(--radius);
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.weekly-feedback article::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--shell-muted);
+}
+
+.weekly-feedback article.positive::before {
+  background: var(--status-good);
+}
+
+.weekly-feedback article.focus::before {
+  background: var(--status-warning);
+}
+
+.weekly-feedback article.alert::before {
+  background: var(--status-critical);
+}
+
+.weekly-feedback article > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: 700 7px var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--shell-muted);
+}
+
+/* The icon is the non-colour channel for tone, per the status-colour rule. */
+.weekly-feedback article > span i {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  font-style: normal;
+  font-size: 8px;
+  background: color-mix(in srgb, var(--shell-ink) 14%, transparent);
+  color: var(--shell-ink);
+}
+
+.weekly-feedback article.positive > span i {
+  background: var(--status-good);
+  color: #fff;
+}
+
+.weekly-feedback article.focus > span i {
+  background: var(--status-warning);
+  color: #11130f;
+}
+
+.weekly-feedback article.alert > span i {
+  background: var(--status-critical);
+  color: #fff;
+}
+
+.weekly-feedback h4 {
+  font-size: 16px;
+  margin-top: 6px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.weekly-feedback p {
+  font-size: 11px;
+  line-height: 1.65;
+  color: var(--shell-muted);
+  max-width: 52ch;
+}
+
+.weekly-feedback button {
+  margin-top: auto;
+  align-self: flex-start;
+  font: 700 8px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brand-soft);
+  border: 1px solid var(--shell-line);
+  padding: 8px 11px;
+}
+
+.weekly-feedback button:hover {
+  background: color-mix(in srgb, var(--shell-ink) 8%, transparent);
+}
+
+.weekly-more {
+  width: 100%;
+  border: 1px dashed var(--shell-line);
+  color: var(--shell-muted);
+  padding: 11px;
+  font: 700 8px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.weekly-more:hover {
+  color: var(--shell-ink);
+}
+
+/* ── Balance panel ─────────────────────────────────────────────────────── */
+
+.balance-panel {
+  margin-top: 20px;
+  border-top: 1px solid var(--shell-line);
+  padding-top: 20px;
+}
+
+.balance-head p {
+  margin-top: 7px;
+  max-width: 68ch;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--shell-muted);
+}
+
+.balance-list {
+  display: grid;
+  gap: 2px;
+  margin-top: 14px;
+}
+
+.balance-list li {
+  display: grid;
+  grid-template-columns: 110px minmax(80px, 1fr) 74px 88px;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--shell-line);
+}
+
+.balance-list b {
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.balance-list .meter {
+  background: color-mix(in srgb, var(--shell-ink) 14%, transparent);
+}
+
+.balance-value {
+  font: 700 12px var(--font-mono);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.balance-value small {
+  font-size: 8px;
+  color: var(--shell-muted);
+  margin-left: 2px;
+}
+
+.balance-status {
+  font: 700 7px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-style: normal;
+  text-align: right;
+  color: var(--shell-muted);
+}
+
+.balance-status.status-in-range {
+  color: var(--brand-soft);
+}
+
+.balance-status.status-under {
+  color: var(--status-warning);
+}
+
+.balance-status.status-over {
+  color: var(--status-serious);
+}
+
+/* ── Footer ────────────────────────────────────────────────────────────── */
+
+.weekly-report > footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  background: var(--shell-2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-top: 20px;
+}
+
+.weekly-report > footer p {
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--shell-muted);
+}
+
+.weekly-report > footer p b {
+  color: var(--shell-ink);
+}
+
+.weekly-report > footer button {
+  background: var(--brand-soft);
+  color: var(--on-brand);
+  padding: 11px 15px;
+  font: 800 8px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
